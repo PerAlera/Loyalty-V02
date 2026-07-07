@@ -1,0 +1,87 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  CASHIER
+  CUSTOMER
+}
+
+enum TransactionType {
+  EARN
+  REDEEM
+}
+
+model User {
+  id            String    @id @default(cuid())
+  phone         String    @unique
+  passwordHash  String
+  name          String
+  surname       String
+  role          Role      @default(CUSTOMER)
+  birthday      DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  // For OWNER: the store they own
+  store         Store?    @relation("StoreOwner")
+
+  // For CUSTOMER: wallet
+  wallet        Wallet?
+
+  // Transactions involved
+  customerTransactions Transaction[] @relation("CustomerTransactions")
+  cashierTransactions  Transaction[] @relation("CashierTransactions")
+}
+
+model Store {
+  id          String   @id @default(cuid())
+  name        String
+  ownerId     String   @unique
+  owner       User     @relation("StoreOwner", fields: [ownerId], references: [id])
+  
+  settings    StoreSettings?
+}
+
+model StoreSettings {
+  id                     String @id @default(cuid())
+  storeId                String @unique
+  store                  Store  @relation(fields: [storeId], references: [id])
+  beansRequiredForReward Int    @default(10)
+  rewardName             String @default("1 Ücretsiz Kahve")
+}
+
+model Wallet {
+  id               String @id @default(cuid())
+  customerId       String @unique
+  customer         User   @relation(fields: [customerId], references: [id])
+  currentBeans     Int    @default(0)
+  rewardsAvailable Int    @default(0)
+}
+
+model Transaction {
+  id         String          @id @default(cuid())
+  type       TransactionType
+  amount     Int
+  customerId String
+  customer   User            @relation("CustomerTransactions", fields: [customerId], references: [id])
+  cashierId  String
+  cashier    User            @relation("CashierTransactions", fields: [cashierId], references: [id])
+  createdAt  DateTime        @default(now())
+}
+
+model QrToken {
+  id        String          @id @default(uuid())
+  type      TransactionType
+  amount    Int
+  creatorId String          // Cashier ID or Customer ID depending on type
+  expiresAt DateTime
+  isUsed    Boolean         @default(false)
+  createdAt DateTime        @default(now())
+}
