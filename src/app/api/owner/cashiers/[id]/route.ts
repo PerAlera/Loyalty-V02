@@ -3,7 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 
-export async function DELETE(req: Request, { params }: { params: { id: string } }) {
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const session = await getServerSession(authOptions);
 
@@ -11,7 +11,8 @@ export async function DELETE(req: Request, { params }: { params: { id: string } 
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
     }
 
-    const cashierId = params.id;
+    const { id } = await params;
+    const cashierId = id;
 
     const store = await prisma.store.findUnique({ where: { ownerId: session.user.id } });
     if (!store) return NextResponse.json({ error: "Mağaza bulunamadı" }, { status: 404 });
