@@ -8,14 +8,20 @@ export default function CashierDashboard() {
   const { data: session } = useSession();
   
   const [token, setToken] = useState<string | null>(null);
+  const [beans, setBeans] = useState<number>(1);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string, type: "success" | "error" } | null>(null);
 
-  const generateToken = async () => {
+  const generateToken = async (e: React.FormEvent) => {
+    e.preventDefault();
     setLoading(true);
     setMessage(null);
     try {
-      const res = await fetch("/api/cashier/qr/generate", { method: "POST" });
+      const res = await fetch("/api/cashier/qr/generate", { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ beans })
+      });
       const data = await res.json();
       
       if (res.ok) {
@@ -49,7 +55,7 @@ export default function CashierDashboard() {
 
       <div className="surface-card" style={{ textAlign: "center", maxWidth: "500px", margin: "0 auto" }}>
         <h2 style={{ marginBottom: "1rem" }}>Müşteriye Puan Ver</h2>
-        <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>Müşterinin okutması için yeni bir QR kod oluşturun.</p>
+        <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>Müşteriye vermek istediğiniz kahve (puan) adedini girin ve QR oluşturun.</p>
 
         {token ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem" }}>
@@ -60,9 +66,19 @@ export default function CashierDashboard() {
             <button className="btn-secondary" onClick={() => setToken(null)} style={{ width: "100%" }}>Yeni Kod Oluştur</button>
           </div>
         ) : (
-          <button className="btn-primary" onClick={generateToken} disabled={loading} style={{ padding: "1rem", fontSize: "1.125rem" }}>
-            {loading ? "Oluşturuluyor..." : "QR Kod Oluştur (Puan Ver)"}
-          </button>
+          <form onSubmit={generateToken} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            <input 
+              type="number" 
+              min="1" 
+              className="form-input" 
+              value={beans} 
+              onChange={e => setBeans(parseInt(e.target.value))} 
+              required 
+            />
+            <button type="submit" className="btn-primary" disabled={loading} style={{ padding: "1rem", fontSize: "1.125rem" }}>
+              {loading ? "Oluşturuluyor..." : "QR Kod Oluştur"}
+            </button>
+          </form>
         )}
       </div>
     </div>
