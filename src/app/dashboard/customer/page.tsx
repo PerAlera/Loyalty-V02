@@ -1,19 +1,20 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
-import { QRCodeSVG } from "qrcode.react";
-import { Scanner } from "@yudiel/react-qr-scanner";
+import { useSession } from "next-auth/react";
+import { Bell, Coffee, ChevronRight, Gift } from "lucide-react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 
-export default function CustomerDashboard() {
+export default function CustomerHome() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [wallet, setWallet] = useState<{ beans: number, rewards: number } | null>(null);
   const [announcements, setAnnouncements] = useState<any[]>([]);
-  const [redeemToken, setRedeemToken] = useState<string | null>(null);
-  
-  const [mode, setMode] = useState<"IDLE" | "GENERATE" | "SCAN">("IDLE");
-  const [message, setMessage] = useState<{ text: string, type: "success" | "error" } | null>(null);
   const [loading, setLoading] = useState(true);
+
+  // Patron ayarlarından gelecek, şimdilik varsayılan 10
+  const requiredCoffees = 10; 
 
   useEffect(() => {
     fetchData();
@@ -39,137 +40,128 @@ export default function CustomerDashboard() {
     setLoading(false);
   };
 
-  const handleGenerateRedeemQR = async () => {
-    setMessage(null);
-    try {
-      const res = await fetch("/api/customer/qr/generate", { method: "POST" });
-      const data = await res.json();
-      if (res.ok) {
-        setRedeemToken(data.token);
-        setMode("GENERATE");
-      } else {
-        setMessage({ text: data.error, type: "error" });
-      }
-    } catch (err) {
-      setMessage({ text: "Bir hata oluştu", type: "error" });
-    }
-  };
-
-  const handleScan = async (scannedData: string) => {
-    setMode("IDLE");
-    setMessage(null);
-    try {
-      const res = await fetch("/api/customer/qr/verify", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token: scannedData })
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setMessage({ text: data.message, type: "success" });
-        setWallet({ beans: data.newBeans, rewards: data.newRewards });
-      } else {
-        setMessage({ text: data.error, type: "error" });
-      }
-    } catch (err) {
-      setMessage({ text: "Okuma başarısız", type: "error" });
-    }
-  };
-
   if (loading) return <div style={{ padding: "3rem", textAlign: "center" }}>Yükleniyor...</div>;
 
+  const currentBeans = wallet?.beans || 0;
+  const progress = Math.min(currentBeans, requiredCoffees);
+
   return (
-    <div className="container" style={{ paddingTop: "2rem", paddingBottom: "3rem" }}>
-      <div className="dashboard-header">
-        <h1 style={{ color: "var(--text-primary)" }}>Müşteri Paneli</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span>{session?.user?.name} {session?.user?.surname}</span>
-          <button className="btn-secondary" onClick={() => signOut({ callbackUrl: '/' })} style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>
-            Çıkış Yap
-          </button>
+    <div className="container" style={{ paddingTop: "2rem", paddingBottom: "6rem" }}>
+      
+      {/* Header */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+        <div>
+          <div style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>Merhaba</div>
+          <h1 style={{ fontSize: "1.5rem", marginBottom: 0 }}>{session?.user?.name} 👋</h1>
+        </div>
+        <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--surface-shadow)" }}>
+          <Bell size={20} color="var(--text-primary)" />
         </div>
       </div>
 
-      {message && (
-        <div style={{ padding: "1rem", borderRadius: "0.75rem", marginBottom: "1.5rem", background: message.type === "error" ? "rgba(239, 68, 68, 0.1)" : "rgba(106, 153, 78, 0.1)", color: message.type === "error" ? "var(--danger)" : "var(--success)", border: `1px solid ${message.type === "error" ? "var(--danger)" : "var(--success)"}` }}>
-          {message.text}
-        </div>
-      )}
-
-      {/* Cüzdan Özeti */}
-      <div className="grid-2" style={{ marginBottom: "2rem" }}>
-        <div className="glass-panel" style={{ padding: "2rem", textAlign: "center" }}>
-          <h3 style={{ color: "var(--text-secondary)", fontSize: "1.25rem", marginBottom: "0.5rem" }}>Biriken Çekirdek</h3>
-          <div style={{ fontSize: "3.5rem", fontWeight: "bold", color: "var(--accent-color)" }}>{wallet?.beans || 0}</div>
-        </div>
-        <div className="glass-panel" style={{ padding: "2rem", textAlign: "center" }}>
-          <h3 style={{ color: "var(--text-secondary)", fontSize: "1.25rem", marginBottom: "0.5rem" }}>Kazanılan Ücretsiz Kahve</h3>
-          <div style={{ fontSize: "3.5rem", fontWeight: "bold", color: "var(--success)" }}>{wallet?.rewards || 0}</div>
-        </div>
-      </div>
-
-      {/* Duyurular & Kampanyalar */}
-      {announcements.length > 0 && (
-        <div className="glass-panel" style={{ marginBottom: "3rem", padding: "1.5rem" }}>
-          <h2 style={{ fontSize: "1.5rem", marginBottom: "1rem", color: "var(--accent-color)" }}>🎉 Güncel Kampanyalar</h2>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {announcements.map((ann) => (
-              <div key={ann.id} style={{ padding: "1rem", background: "var(--bg-secondary)", borderRadius: "1rem", borderLeft: "4px solid var(--accent-color)" }}>
-                <h3 style={{ fontSize: "1.1rem", marginBottom: "0.5rem", fontWeight: "600" }}>{ann.title}</h3>
-                <p style={{ color: "var(--text-secondary)" }}>{ann.content}</p>
-              </div>
-            ))}
+      {/* Loyalty Card (Mor Tasarım) */}
+      <div style={{ 
+        background: "linear-gradient(135deg, var(--secondary) 0%, var(--secondary-hover) 100%)",
+        borderRadius: "1.5rem",
+        padding: "1.5rem",
+        color: "white",
+        marginBottom: "2rem",
+        boxShadow: "0 10px 25px -5px rgba(124, 58, 237, 0.4)"
+      }}>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1.5rem" }}>
+          <div>
+            <h2 style={{ fontSize: "1.25rem", margin: 0 }}>Coffee House</h2>
+            <div style={{ fontSize: "0.875rem", opacity: 0.8 }}>Sadakat Kartı</div>
           </div>
+          <Coffee size={24} opacity={0.8} />
         </div>
+
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1rem" }}>
+          <div style={{ fontSize: "2rem", fontWeight: "bold" }}>
+            {progress} <span style={{ fontSize: "1rem", opacity: 0.8, fontWeight: "normal" }}>/ {requiredCoffees}</span>
+          </div>
+          {wallet?.rewards && wallet.rewards > 0 ? (
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "white", color: "var(--secondary)", padding: "0.25rem 0.75rem", borderRadius: "1rem", fontSize: "0.875rem", fontWeight: "bold" }}>
+              <Gift size={16} /> {wallet.rewards} Ödül
+            </div>
+          ) : null}
+        </div>
+
+        {/* Cup Progress Icons */}
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} style={{ opacity: i < (progress / 2) ? 1 : 0.3 }}>
+              <Coffee size={24} fill={i < (progress / 2) ? "white" : "none"} />
+            </div>
+          ))}
+        </div>
+
+        <button 
+          onClick={() => router.push("/dashboard/customer/qr")}
+          style={{ 
+            width: "100%", 
+            padding: "0.875rem", 
+            backgroundColor: "white", 
+            color: "var(--secondary)", 
+            border: "none", 
+            borderRadius: "0.75rem",
+            fontWeight: "bold",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "0.5rem",
+            cursor: "pointer"
+          }}
+        >
+          {wallet?.rewards && wallet.rewards > 0 ? "Ödül Kullan (QR)" : "Puan Kazan (QR Okut)"}
+        </button>
+      </div>
+
+      {/* Yakındaki Kampanyalar */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+        <h2 style={{ fontSize: "1.125rem", margin: 0 }}>Güncel Kampanyalar</h2>
+      </div>
+      
+      {announcements.length > 0 ? (
+        <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem" }}>
+          {announcements.map((ann) => (
+            <div key={ann.id} className="surface-card" style={{ display: "flex", gap: "1rem", padding: "1rem" }}>
+              <div style={{ width: "60px", height: "60px", borderRadius: "0.75rem", backgroundColor: "var(--bg-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Coffee size={24} color="var(--primary)" />
+              </div>
+              <div style={{ flex: 1 }}>
+                <h3 style={{ fontSize: "1rem", marginBottom: "0.25rem" }}>{ann.title}</h3>
+                <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{ann.content}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>Şu an aktif kampanya bulunmuyor.</p>
       )}
 
-      <div className="grid-2">
-        
-        {/* Puan Kazanma (Kasiyer QR Okutma) */}
-        <div className="glass-panel" style={{ textAlign: "center" }}>
-          <h2 style={{ marginBottom: "1rem" }}>Kahve (Puan) Kazan</h2>
-          <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>Kasiyerin oluşturduğu barkodu kameranızla okutarak puan kazanın.</p>
-          
-          {mode !== "SCAN" ? (
-            <button className="btn-primary" onClick={() => setMode("SCAN")}>Kamerayı Aç ve Barkod Okut</button>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1rem" }}>
-              <div style={{ width: "100%", maxWidth: "300px", borderRadius: "1rem", overflow: "hidden" }}>
-                <Scanner 
-                  onScan={(result) => handleScan(result[0].rawValue)}
-                />
-              </div>
-              <button className="btn-secondary" onClick={() => setMode("IDLE")}>İptal</button>
-            </div>
-          )}
-        </div>
-
-        {/* Ödül Kullanma (Müşteri QR Üretme) */}
-        <div className="glass-panel" style={{ textAlign: "center", border: wallet?.rewards && wallet.rewards > 0 ? "2px solid var(--success)" : "" }}>
-          <h2 style={{ marginBottom: "1rem" }}>Ödül Kullan</h2>
-          <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>Ücretsiz kahve hakkınızı kullanmak için kasiyere barkod gösterin.</p>
-          
-          {mode !== "GENERATE" ? (
-            <button 
-              className="btn-primary" 
-              style={{ background: wallet?.rewards && wallet.rewards > 0 ? "var(--success)" : "var(--border-color)", cursor: wallet?.rewards && wallet.rewards > 0 ? "pointer" : "not-allowed" }}
-              onClick={handleGenerateRedeemQR}
-              disabled={!wallet?.rewards || wallet.rewards < 1}
-            >
-              {wallet?.rewards && wallet.rewards > 0 ? "Kahvemi Al (QR Kod Oluştur)" : "Yetersiz Bakiye"}
-            </button>
-          ) : (
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem" }}>
-              <div style={{ padding: "1rem", background: "white", borderRadius: "1rem" }}>
-                {redeemToken && <QRCodeSVG value={redeemToken} size={200} />}
-              </div>
-              <p style={{ color: "var(--success)", fontWeight: "bold" }}>Kasiyerden bu kodu okutmasını isteyin.</p>
-              <button className="btn-secondary" onClick={() => { setMode("IDLE"); setRedeemToken(null); fetchData(); }}>Kapat</button>
-            </div>
-          )}
-        </div>
-
+      {/* Son Ziyaretler (Kısa) */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+        <h2 style={{ fontSize: "1.125rem", margin: 0 }}>Hızlı Geçmiş</h2>
+        <Link href="/dashboard/customer/history" style={{ fontSize: "0.875rem", color: "var(--primary)", display: "flex", alignItems: "center" }}>
+          Tümünü Gör <ChevronRight size={16} />
+        </Link>
       </div>
+      <div className="surface-card" style={{ padding: "1rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+            <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "var(--bg-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Coffee size={20} color="var(--text-primary)" />
+            </div>
+            <div>
+              <div style={{ fontWeight: 600 }}>Cüzdan Durumu</div>
+              <div style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>Toplam Puanınız</div>
+            </div>
+          </div>
+          <div style={{ fontWeight: "bold", color: "var(--success)" }}>+{wallet?.beans || 0} Puan</div>
+        </div>
+      </div>
+
     </div>
   );
 }

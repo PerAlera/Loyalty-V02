@@ -1,29 +1,35 @@
 :root {
-  /* Renk Paleti (Krem & Kahve) */
-  --bg-primary: #EBE3D5; /* Sıcak Bej */
-  --bg-secondary: #DED0B6; /* Koyu Bej */
-  --text-primary: #4A3B32; /* Koyu kahve */
-  --text-secondary: #8B5E3C; /* Sütlü kahve */
-  --accent-color: #6F4E37; /* Klasik kahverengi */
-  --accent-hover: #5A3D2B;
-  --success: #6A994E; /* Soft yeşil */
-  --danger: #BC4749; /* Soft kırmızı */
+  /* Renk Paleti (CEP Design System) */
+  --bg-primary: #F8FAFC; 
+  --bg-secondary: #FFFFFF;
+  --text-primary: #0F172A; 
+  --text-secondary: #64748B; 
   
-  /* Glassmorphism Ayarları */
-  --glass-bg: rgba(255, 255, 255, 0.55);
-  --glass-border: rgba(139, 94, 60, 0.15);
-  --glass-shadow: 0 8px 32px 0 rgba(111, 78, 55, 0.08);
+  --primary: #3A7AFE; /* Mavi */
+  --primary-hover: #2563EB;
+  
+  --secondary: #7C3AED; /* Mor */
+  --secondary-hover: #6D28D9;
+  
+  --success: #22C55E;
+  --danger: #EF4444;
+  --warning: #F59E0B;
+  
+  --border-color: #E2E8F0;
+  
+  /* Glassmorphism Ayarları (İptal - Düz Modern UI) */
+  --surface-shadow: 0 4px 24px -4px rgba(15, 23, 42, 0.05);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #2C241B; /* Koyu kahve siyahı */
-    --bg-secondary: #3D3124;
-    --text-primary: #F5EBE0; /* Açık krem metin */
-    --text-secondary: #D4A373;
-    --accent-color: #D4A373;
-    --glass-bg: rgba(50, 42, 34, 0.7);
-    --glass-border: rgba(212, 163, 115, 0.15);
+    --bg-primary: #0F172A;
+    --bg-secondary: #1E293B;
+    --text-primary: #F8FAFC;
+    --text-secondary: #94A3B8;
+    
+    --border-color: #334155;
+    --surface-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.2);
   }
 }
 
@@ -31,14 +37,13 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  font-family: var(--font-outfit), sans-serif;
-  font-weight: 300;
+  font-family: var(--font-inter), sans-serif;
 }
 
 body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
-  line-height: 1.6;
+  line-height: 1.5;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -46,11 +51,9 @@ body {
 
 /* Tipografi */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-cormorant), serif;
-  font-style: italic;
-  font-weight: 400;
-  letter-spacing: 0.02em;
-  margin-bottom: 1rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-bottom: 0.5rem;
 }
 
 a {
@@ -71,20 +74,18 @@ a:hover {
   padding: 0 1.5rem;
 }
 
-/* Glassmorphism Paneller */
-.glass-panel {
-  background: var(--glass-bg);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
-  border-radius: 1.5rem;
-  box-shadow: var(--glass-shadow);
-  padding: 2.5rem;
+/* Yüzey Kartları (Surface) */
+.surface-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 1rem;
+  box-shadow: var(--surface-shadow);
+  padding: 1.5rem;
 }
 
 /* Butonlar */
 .btn-primary {
-  background-color: var(--accent-color);
+  background-color: var(--primary);
   color: white;
   border: none;
   border-radius: 0.75rem;
@@ -95,18 +96,17 @@ a:hover {
   transition: all 0.2s ease;
   display: inline-block;
   text-align: center;
+  width: 100%;
 }
 
 .btn-primary:hover {
-  background-color: var(--accent-hover);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(212, 163, 115, 0.3);
+  background-color: var(--primary-hover);
 }
 
 .btn-secondary {
   background-color: transparent;
   color: var(--text-primary);
-  border: 1px solid var(--text-secondary);
+  border: 1px solid var(--border-color);
   border-radius: 0.75rem;
   padding: 0.875rem 1.5rem;
   font-size: 1rem;
@@ -116,7 +116,7 @@ a:hover {
 }
 
 .btn-secondary:hover {
-  background-color: var(--bg-secondary);
+  background-color: var(--bg-primary);
 }
 
 /* Form Elemanları */
