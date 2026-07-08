@@ -21,7 +21,8 @@ export async function POST(req: Request) {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const userRole = role === "OWNER" ? "OWNER" : "CUSTOMER";
+    // Müşteriler dışarıdan sadece CUSTOMER olarak kayıt olabilir.
+    const userRole = "CUSTOMER";
 
     const newUser = await prisma.user.create({
       data: {
