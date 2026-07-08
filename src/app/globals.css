@@ -1,7 +1,7 @@
 :root {
   /* Renk Paleti (Krem & Kahve) */
-  --bg-primary: #FDFBF7; /* Açık krem */
-  --bg-secondary: #F5EBE0; /* Koyu krem */
+  --bg-primary: #EBE3D5; /* Sıcak Bej */
+  --bg-secondary: #DED0B6; /* Koyu Bej */
   --text-primary: #4A3B32; /* Koyu kahve */
   --text-secondary: #8B5E3C; /* Sütlü kahve */
   --accent-color: #6F4E37; /* Klasik kahverengi */
@@ -10,15 +10,15 @@
   --danger: #BC4749; /* Soft kırmızı */
   
   /* Glassmorphism Ayarları */
-  --glass-bg: rgba(255, 255, 255, 0.65);
+  --glass-bg: rgba(255, 255, 255, 0.55);
   --glass-border: rgba(139, 94, 60, 0.15);
-  --glass-shadow: 0 8px 32px 0 rgba(111, 78, 55, 0.06);
+  --glass-shadow: 0 8px 32px 0 rgba(111, 78, 55, 0.08);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #251F19; /* Koyu kahve siyahı */
-    --bg-secondary: #322A22;
+    --bg-primary: #2C241B; /* Koyu kahve siyahı */
+    --bg-secondary: #3D3124;
     --text-primary: #F5EBE0; /* Açık krem metin */
     --text-secondary: #D4A373;
     --accent-color: #D4A373;
