@@ -8,6 +8,7 @@ import { Scanner } from "@yudiel/react-qr-scanner";
 export default function CustomerDashboard() {
   const { data: session } = useSession();
   const [wallet, setWallet] = useState<{ beans: number, rewards: number } | null>(null);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [redeemToken, setRedeemToken] = useState<string | null>(null);
   
   const [mode, setMode] = useState<"IDLE" | "GENERATE" | "SCAN">("IDLE");
@@ -15,15 +16,22 @@ export default function CustomerDashboard() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchWallet();
+    fetchData();
   }, []);
 
-  const fetchWallet = async () => {
+  const fetchData = async () => {
     try {
-      const res = await fetch("/api/customer/wallet");
-      if (res.ok) {
-        const data = await res.json();
+      const [walletRes, announcementsRes] = await Promise.all([
+        fetch("/api/customer/wallet"),
+        fetch("/api/announcements")
+      ]);
+      if (walletRes.ok) {
+        const data = await walletRes.json();
         setWallet(data.wallet);
+      }
+      if (announcementsRes.ok) {
+        const data = await announcementsRes.json();
+        setAnnouncements(data.announcements || []);
       }
     } catch (e) {
       console.error(e);
@@ -83,15 +91,15 @@ export default function CustomerDashboard() {
       </div>
 
       {message && (
-        <div style={{ padding: "1rem", borderRadius: "0.75rem", marginBottom: "1.5rem", background: message.type === "error" ? "rgba(239, 68, 68, 0.1)" : "rgba(16, 185, 129, 0.1)", color: message.type === "error" ? "var(--danger)" : "var(--success)", border: `1px solid ${message.type === "error" ? "var(--danger)" : "var(--success)"}` }}>
+        <div style={{ padding: "1rem", borderRadius: "0.75rem", marginBottom: "1.5rem", background: message.type === "error" ? "rgba(239, 68, 68, 0.1)" : "rgba(106, 153, 78, 0.1)", color: message.type === "error" ? "var(--danger)" : "var(--success)", border: `1px solid ${message.type === "error" ? "var(--danger)" : "var(--success)"}` }}>
           {message.text}
         </div>
       )}
 
       {/* Cüzdan Özeti */}
-      <div className="grid-2" style={{ marginBottom: "3rem" }}>
+      <div className="grid-2" style={{ marginBottom: "2rem" }}>
         <div className="glass-panel" style={{ padding: "2rem", textAlign: "center" }}>
-          <h3 style={{ color: "var(--text-secondary)", fontSize: "1.25rem", marginBottom: "0.5rem" }}>Biriken Çekirdek (Puan)</h3>
+          <h3 style={{ color: "var(--text-secondary)", fontSize: "1.25rem", marginBottom: "0.5rem" }}>Biriken Çekirdek</h3>
           <div style={{ fontSize: "3.5rem", fontWeight: "bold", color: "var(--accent-color)" }}>{wallet?.beans || 0}</div>
         </div>
         <div className="glass-panel" style={{ padding: "2rem", textAlign: "center" }}>
@@ -99,6 +107,21 @@ export default function CustomerDashboard() {
           <div style={{ fontSize: "3.5rem", fontWeight: "bold", color: "var(--success)" }}>{wallet?.rewards || 0}</div>
         </div>
       </div>
+
+      {/* Duyurular & Kampanyalar */}
+      {announcements.length > 0 && (
+        <div className="glass-panel" style={{ marginBottom: "3rem", padding: "1.5rem" }}>
+          <h2 style={{ fontSize: "1.5rem", marginBottom: "1rem", color: "var(--accent-color)" }}>🎉 Güncel Kampanyalar</h2>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {announcements.map((ann) => (
+              <div key={ann.id} style={{ padding: "1rem", background: "var(--bg-secondary)", borderRadius: "1rem", borderLeft: "4px solid var(--accent-color)" }}>
+                <h3 style={{ fontSize: "1.1rem", marginBottom: "0.5rem", fontWeight: "600" }}>{ann.title}</h3>
+                <p style={{ color: "var(--text-secondary)" }}>{ann.content}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="grid-2">
         
@@ -141,7 +164,7 @@ export default function CustomerDashboard() {
                 {redeemToken && <QRCodeSVG value={redeemToken} size={200} />}
               </div>
               <p style={{ color: "var(--success)", fontWeight: "bold" }}>Kasiyerden bu kodu okutmasını isteyin.</p>
-              <button className="btn-secondary" onClick={() => { setMode("IDLE"); setRedeemToken(null); fetchWallet(); }}>Kapat</button>
+              <button className="btn-secondary" onClick={() => { setMode("IDLE"); setRedeemToken(null); fetchData(); }}>Kapat</button>
             </div>
           )}
         </div>

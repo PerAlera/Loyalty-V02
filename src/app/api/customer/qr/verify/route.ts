@@ -34,12 +34,10 @@ export async function POST(req: Request) {
     const beansEarned = qrToken.beans || 1;
     let newBeans = wallet.beans + beansEarned;
     let newRewards = wallet.rewards;
-    let transactionType: "EARN_BEAN" | "SPEND_BEAN" = "EARN_BEAN";
 
     while (newBeans >= requiredCoffees) {
       newBeans -= requiredCoffees;
       newRewards += 1;
-      transactionType = "SPEND_BEAN"; // En az bir kez ödüle dönüştü
     }
 
     await prisma.$transaction([
@@ -54,7 +52,7 @@ export async function POST(req: Request) {
       prisma.transaction.create({
         data: {
           userId: session.user.id,
-          type: transactionType,
+          type: "EARN_BEAN", // Her zaman kazanım olarak kaydet
           amount: beansEarned
         }
       })

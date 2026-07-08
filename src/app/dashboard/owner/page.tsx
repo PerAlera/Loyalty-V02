@@ -8,11 +8,15 @@ export default function OwnerDashboard() {
   const [stats, setStats] = useState<any>(null);
   const [cashiers, setCashiers] = useState<any[]>([]);
   const [settings, setSettings] = useState<any>(null);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
 
   // Yeni Kasiyer Formu
   const [newCashier, setNewCashier] = useState({ name: "", surname: "", phone: "", password: "" });
   const [newSettings, setNewSettings] = useState({ requiredCoffees: 10 });
   
+  // Yeni Duyuru Formu
+  const [newAnnouncement, setNewAnnouncement] = useState({ title: "", content: "" });
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,10 +26,11 @@ export default function OwnerDashboard() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [statsRes, cashiersRes, settingsRes] = await Promise.all([
+      const [statsRes, cashiersRes, settingsRes, announcementsRes] = await Promise.all([
         fetch("/api/owner/stats"),
         fetch("/api/owner/cashiers"),
-        fetch("/api/owner/settings")
+        fetch("/api/owner/settings"),
+        fetch("/api/announcements")
       ]);
 
       if (statsRes.ok) setStats(await statsRes.json());
@@ -37,6 +42,10 @@ export default function OwnerDashboard() {
         const data = await settingsRes.json();
         setSettings(data.settings);
         setNewSettings({ requiredCoffees: data.settings.requiredCoffees });
+      }
+      if (announcementsRes.ok) {
+        const data = await announcementsRes.json();
+        setAnnouncements(data.announcements || []);
       }
     } catch (e) {
       console.error(e);
@@ -77,6 +86,27 @@ export default function OwnerDashboard() {
       alert("Ayarlar başarıyla kaydedildi.");
       fetchData();
     }
+  };
+
+  const handleAddAnnouncement = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const res = await fetch("/api/owner/announcements", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newAnnouncement)
+    });
+    if (res.ok) {
+      setNewAnnouncement({ title: "", content: "" });
+      fetchData();
+    } else {
+      alert("Duyuru eklenirken hata oluştu.");
+    }
+  };
+
+  const handleDeleteAnnouncement = async (id: string) => {
+    if (!confirm("Bu duyuruyu silmek istediğinize emin misiniz?")) return;
+    const res = await fetch(`/api/owner/announcements/${id}`, { method: "DELETE" });
+    if (res.ok) fetchData();
   };
 
   if (loading) {
@@ -152,27 +182,58 @@ export default function OwnerDashboard() {
           </div>
         </div>
 
-        {/* Mağaza Ayarları */}
-        <div className="glass-panel" style={{ height: "fit-content" }}>
-          <h2 style={{ marginBottom: "1.5rem" }}>Kampanya Ayarları</h2>
-          <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <div className="form-group">
-              <label className="form-label">Ücretsiz Kahve İçin Gereken Çekirdek (Puan) Sayısı</label>
-              <input 
-                type="number" 
-                min="1" 
-                max="50"
-                className="form-input" 
-                value={newSettings.requiredCoffees} 
-                onChange={e => setNewSettings({ requiredCoffees: parseInt(e.target.value) })}
-                required 
-              />
-              <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginTop: "0.5rem" }}>
-                Müşteriler, belirlediğiniz adette çekirdek topladığında 1 adet ücretsiz ödül kazanır. (Mevcut: {settings?.requiredCoffees})
-              </p>
+        {/* Mağaza Ayarları ve Duyurular */}
+        <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+          
+          <div className="glass-panel" style={{ height: "fit-content" }}>
+            <h2 style={{ marginBottom: "1.5rem" }}>Kampanya Ayarları</h2>
+            <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div className="form-group">
+                <label className="form-label">Ücretsiz Kahve İçin Gereken Çekirdek Sayısı</label>
+                <input 
+                  type="number" 
+                  min="1" 
+                  max="50"
+                  className="form-input" 
+                  value={newSettings.requiredCoffees} 
+                  onChange={e => setNewSettings({ requiredCoffees: parseInt(e.target.value) })}
+                  required 
+                />
+                <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginTop: "0.5rem" }}>
+                  Müşteriler, belirlediğiniz adette çekirdek topladığında 1 adet ücretsiz ödül kazanır. (Mevcut: {settings?.requiredCoffees})
+                </p>
+              </div>
+              <button type="submit" className="btn-primary" style={{ marginTop: "1rem" }}>Ayarları Kaydet</button>
+            </form>
+          </div>
+
+          <div className="glass-panel" style={{ height: "fit-content" }}>
+            <h2 style={{ marginBottom: "1.5rem" }}>Duyurular & Bildirimler</h2>
+            <form onSubmit={handleAddAnnouncement} style={{ marginBottom: "2rem", display: "grid", gap: "1rem", background: "var(--bg-secondary)", padding: "1.5rem", borderRadius: "1rem" }}>
+              <input className="form-input" placeholder="Duyuru Başlığı" value={newAnnouncement.title} onChange={e => setNewAnnouncement({...newAnnouncement, title: e.target.value})} required />
+              <textarea className="form-input" placeholder="İçerik..." rows={3} value={newAnnouncement.content} onChange={e => setNewAnnouncement({...newAnnouncement, content: e.target.value})} required />
+              <button type="submit" className="btn-primary">Müşterilere Duyur</button>
+            </form>
+
+            <div>
+              {announcements.length === 0 ? <p style={{ color: "var(--text-secondary)" }}>Aktif duyuru yok.</p> : (
+                <ul style={{ listStyle: "none", padding: 0 }}>
+                  {announcements.map(ann => (
+                    <li key={ann.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", padding: "1rem", borderBottom: "1px solid var(--glass-border)" }}>
+                      <div>
+                        <div style={{ fontWeight: "600", color: "var(--accent-color)" }}>{ann.title}</div>
+                        <div style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginTop: "0.25rem" }}>{ann.content}</div>
+                      </div>
+                      <button onClick={() => handleDeleteAnnouncement(ann.id)} className="btn-secondary" style={{ color: "var(--danger)", borderColor: "var(--danger)", padding: "0.25rem 0.75rem", fontSize: "0.75rem", marginLeft: "1rem" }}>
+                        Sil
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
-            <button type="submit" className="btn-primary" style={{ marginTop: "1rem" }}>Ayarları Kaydet</button>
-          </form>
+          </div>
+
         </div>
 
       </div>
