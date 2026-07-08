@@ -1,35 +1,29 @@
 :root {
-  /* Brand Colors - Premium Coffee Theme */
-  --primary-color: #D4A373; /* Elegant Gold/Coffee */
-  --primary-dark: #A9845B;
-  --bg-color: #FAFAFA; /* Light mode */
-  --surface-color: #FFFFFF;
-  --text-main: #2D3748;
-  --text-muted: #718096;
-  --border-color: #E2E8F0;
+  /* Renk Paleti (Premium & Soft) */
+  --bg-primary: #FAFAFA;
+  --bg-secondary: #F3F4F6;
+  --text-primary: #111827;
+  --text-secondary: #4B5563;
+  --accent-color: #D4A373; /* Kahve tonu */
+  --accent-hover: #C5915D;
+  --success: #10B981;
+  --danger: #EF4444;
   
-  /* Glassmorphism / UI */
+  /* Glassmorphism Ayarları */
   --glass-bg: rgba(255, 255, 255, 0.7);
-  --glass-border: rgba(255, 255, 255, 0.5);
-  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
-  
-  /* Animations */
-  --transition-fast: 0.2s ease;
-  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --border-radius: 16px;
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-color: #0F172A; /* Deep dark blue/black */
-    --surface-color: #1E293B;
-    --text-main: #F8FAFC;
-    --text-muted: #94A3B8;
-    --border-color: #334155;
-    
-    --glass-bg: rgba(30, 41, 59, 0.7);
+    --bg-primary: #121212;
+    --bg-secondary: #1E1E1E;
+    --text-primary: #F9FAFB;
+    --text-secondary: #9CA3AF;
+    --accent-color: #E6B981;
+    --glass-bg: rgba(30, 30, 30, 0.7);
     --glass-border: rgba(255, 255, 255, 0.1);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
   }
 }
 
@@ -37,73 +31,125 @@
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-html,
 body {
-  max-width: 100vw;
-  overflow-x: hidden;
-  background-color: var(--bg-color);
-  color: var(--text-main);
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Tipografi */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  margin-bottom: 1rem;
 }
 
 a {
-  color: inherit;
+  color: var(--accent-color);
   text-decoration: none;
+  transition: color 0.2s ease;
 }
 
-button {
-  cursor: pointer;
-  border: none;
-  background: none;
-  font-family: inherit;
+a:hover {
+  color: var(--accent-hover);
 }
 
-/* Premium utility classes */
+/* Genel Sınıflar */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* Glassmorphism Paneller */
 .glass-panel {
   background: var(--glass-bg);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--glass-border);
-  border-radius: var(--border-radius);
+  border-radius: 1.5rem;
   box-shadow: var(--glass-shadow);
+  padding: 2.5rem;
 }
 
+/* Butonlar */
 .btn-primary {
-  background-color: var(--primary-color);
-  color: #fff;
-  padding: 12px 24px;
-  border-radius: 50px;
+  background-color: var(--accent-color);
+  color: white;
+  border: none;
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
   font-weight: 600;
-  transition: all var(--transition-normal);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 14px rgba(212, 163, 115, 0.4);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+  text-align: center;
 }
 
 .btn-primary:hover {
+  background-color: var(--accent-hover);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(212, 163, 115, 0.6);
-  background-color: var(--primary-dark);
+  box-shadow: 0 4px 12px rgba(212, 163, 115, 0.3);
 }
 
-.fade-in {
-  animation: fadeIn var(--transition-normal);
+.btn-secondary {
+  background-color: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--text-secondary);
+  border-radius: 0.75rem;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
+.btn-secondary:hover {
+  background-color: var(--bg-secondary);
+}
+
+/* Form Elemanları */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-label {
+  display: block;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.form-input {
+  width: 100%;
+  padding: 0.875rem 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--text-secondary);
+  background-color: transparent;
+  color: var(--text-primary);
+  font-size: 1rem;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: var(--accent-color);
+}
+
+/* Animasyonlar */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* Container */
-.container {
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 20px;
+.fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
 }

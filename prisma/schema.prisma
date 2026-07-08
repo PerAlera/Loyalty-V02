@@ -7,81 +7,89 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id           String        @id @default(cuid())
+  phone        String        @unique
+  passwordHash String
+  name         String
+  surname      String
+  role         Role          @default(CUSTOMER)
+  birthDate    DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  wallets      Wallet[]
+  transactions Transaction[] @relation("UserTransactions")
+  qrTokens     QrToken[]
+  store        Store?        @relation("StoreOwner")
+  storeCashier Store?        @relation("StoreCashier", fields: [storeId], references: [id])
+  storeId      String?
+}
+
 enum Role {
+  CUSTOMER
   OWNER
   CASHIER
-  CUSTOMER
-}
-
-enum TransactionType {
-  EARN
-  REDEEM
-}
-
-model User {
-  id            String    @id @default(cuid())
-  phone         String    @unique
-  passwordHash  String
-  name          String
-  surname       String
-  role          Role      @default(CUSTOMER)
-  birthday      DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  // For OWNER: the store they own
-  store         Store?    @relation("StoreOwner")
-
-  // For CUSTOMER: wallet
-  wallet        Wallet?
-
-  // Transactions involved
-  customerTransactions Transaction[] @relation("CustomerTransactions")
-  cashierTransactions  Transaction[] @relation("CashierTransactions")
 }
 
 model Store {
-  id          String   @id @default(cuid())
+  id          String         @id @default(cuid())
   name        String
-  ownerId     String   @unique
-  owner       User     @relation("StoreOwner", fields: [ownerId], references: [id])
-  
+  ownerId     String         @unique
+  owner       User           @relation("StoreOwner", fields: [ownerId], references: [id])
+  cashiers    User[]         @relation("StoreCashier")
   settings    StoreSettings?
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
 }
 
 model StoreSettings {
-  id                     String @id @default(cuid())
-  storeId                String @unique
-  store                  Store  @relation(fields: [storeId], references: [id])
-  beansRequiredForReward Int    @default(10)
-  rewardName             String @default("1 Ücretsiz Kahve")
+  id              String   @id @default(cuid())
+  storeId         String   @unique
+  store           Store    @relation(fields: [storeId], references: [id])
+  requiredCoffees Int      @default(10)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
 
 model Wallet {
-  id               String @id @default(cuid())
-  customerId       String @unique
-  customer         User   @relation(fields: [customerId], references: [id])
-  currentBeans     Int    @default(0)
-  rewardsAvailable Int    @default(0)
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id])
+  beans     Int      @default(0) // Çekirdek (Puan) sayısı
+  rewards   Int      @default(0) // Kazanılan ücretsiz kahve sayısı
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Transaction {
-  id         String          @id @default(cuid())
-  type       TransactionType
-  amount     Int
-  customerId String
-  customer   User            @relation("CustomerTransactions", fields: [customerId], references: [id])
-  cashierId  String
-  cashier    User            @relation("CashierTransactions", fields: [cashierId], references: [id])
-  createdAt  DateTime        @default(now())
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation("UserTransactions", fields: [userId], references: [id])
+  type      TransactionType
+  amount    Int              // Kazanılan/Harcanan miktar (Çekirdek veya Ödül)
+  createdAt DateTime         @default(now())
+}
+
+enum TransactionType {
+  EARN_BEAN       // Çekirdek kazanma
+  SPEND_BEAN      // 10 çekirdeğin sıfırlanıp ödüle dönüşmesi
+  REDEEM_REWARD   // Ödül (ücretsiz kahve) kullanımı
 }
 
 model QrToken {
-  id        String          @id @default(uuid())
-  type      TransactionType
-  amount    Int
-  creatorId String          // Cashier ID or Customer ID depending on type
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
+  type      QrType
+  beans     Int?     // Eğer puan kazanma QR'ı ise adet
   expiresAt DateTime
-  isUsed    Boolean         @default(false)
-  createdAt DateTime        @default(now())
+  isUsed    Boolean  @default(false)
+  createdAt DateTime @default(now())
+}
+
+enum QrType {
+  EARN      // Kasiyerin oluşturduğu, müşterinin okuttuğu (Puan Kazanma)
+  REDEEM    // Müşterinin oluşturduğu, kasiyerin okuttuğu (Ödül Kullanma)
 }
