@@ -1,0 +1,43 @@
+.authContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+.authCard {
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+.authTitle {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+  color: var(--text-primary);
+}
+
+.authSubtitle {
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.formGroup {
+  margin-bottom: 1.25rem;
+  text-align: left;
+}
+
+.authLink {
+  margin-top: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.errorText {
+  color: var(--danger);
+  margin-bottom: 1rem;
+  font-size: 0.875rem;
+}

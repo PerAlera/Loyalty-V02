@@ -6,6 +6,8 @@ export const metadata: Metadata = {
   description: "Modern, hızlı ve premium dijital sadakat sistemi.",
 };
 
+import { Providers } from "./providers";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -14,7 +16,9 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body>
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );
