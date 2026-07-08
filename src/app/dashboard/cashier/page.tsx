@@ -57,7 +57,7 @@ export default function CashierDashboard() {
 
   return (
     <div className="container" style={{ paddingTop: "2rem", paddingBottom: "3rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+      <div className="dashboard-header">
         <h1 style={{ color: "var(--text-primary)" }}>Kasiyer Paneli</h1>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <span>{session?.user?.name} {session?.user?.surname}</span>
@@ -73,7 +73,7 @@ export default function CashierDashboard() {
         </div>
       )}
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+      <div className="grid-2">
         
         {/* Kahve Ekleme (QR Üretme) */}
         <div className="glass-panel" style={{ textAlign: "center" }}>

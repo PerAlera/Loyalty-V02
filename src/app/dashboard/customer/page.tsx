@@ -72,7 +72,7 @@ export default function CustomerDashboard() {
 
   return (
     <div className="container" style={{ paddingTop: "2rem", paddingBottom: "3rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+      <div className="dashboard-header">
         <h1 style={{ color: "var(--text-primary)" }}>Müşteri Paneli</h1>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <span>{session?.user?.name} {session?.user?.surname}</span>
@@ -89,7 +89,7 @@ export default function CustomerDashboard() {
       )}
 
       {/* Cüzdan Özeti */}
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "3rem" }}>
+      <div className="grid-2" style={{ marginBottom: "3rem" }}>
         <div className="glass-panel" style={{ padding: "2rem", textAlign: "center" }}>
           <h3 style={{ color: "var(--text-secondary)", fontSize: "1.25rem", marginBottom: "0.5rem" }}>Biriken Çekirdek (Puan)</h3>
           <div style={{ fontSize: "3.5rem", fontWeight: "bold", color: "var(--accent-color)" }}>{wallet?.beans || 0}</div>
@@ -100,7 +100,7 @@ export default function CustomerDashboard() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+      <div className="grid-2">
         
         {/* Puan Kazanma (Kasiyer QR Okutma) */}
         <div className="glass-panel" style={{ textAlign: "center" }}>

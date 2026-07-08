@@ -85,7 +85,7 @@ export default function OwnerDashboard() {
 
   return (
     <div className="container" style={{ paddingTop: "2rem", paddingBottom: "3rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "2rem" }}>
+      <div className="dashboard-header">
         <h1 style={{ color: "var(--accent-color)" }}>Patron Paneli: {stats?.storeName}</h1>
         <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
           <span>Hoş geldin, {session?.user?.name}</span>
@@ -96,7 +96,7 @@ export default function OwnerDashboard() {
       </div>
 
       {/* İstatistikler */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: "1.5rem", marginBottom: "3rem" }}>
         <div className="glass-panel" style={{ padding: "1.5rem", textAlign: "center" }}>
           <h3 style={{ color: "var(--text-secondary)", fontSize: "1rem", marginBottom: "0.5rem" }}>Toplam Müşteri</h3>
           <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "var(--text-primary)" }}>{stats?.totalCustomers || 0}</div>
@@ -115,7 +115,7 @@ export default function OwnerDashboard() {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "2rem" }}>
+      <div className="grid-2">
         
         {/* Kasiyer Yönetimi */}
         <div className="glass-panel">
