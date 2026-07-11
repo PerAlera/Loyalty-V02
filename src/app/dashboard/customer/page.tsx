@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { User, Check, X, Star } from "lucide-react";
+import { User, Check, X, Gift } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Scanner } from "@yudiel/react-qr-scanner";
@@ -68,12 +68,11 @@ export default function CustomerHome() {
     setModalType("SUCCESS");
     setTimeout(() => {
       closeModal();
-    }, 2500); // 2.5 saniye sonra kapat
+    }, 2500);
   };
 
   // --- SCAN (QR Okut Kazan) Logic ---
   const handleScan = async (scannedData: string) => {
-    // Okuma yapıldığında hemen kamerayı durdurmak için modu değiştir
     setModalType("NONE"); 
     try {
       const res = await fetch("/api/customer/qr/verify", {
@@ -115,34 +114,28 @@ export default function CustomerHome() {
   const startPollingForRedeem = () => {
     if (pollInterval.current) clearInterval(pollInterval.current);
     
-    // Her 3 saniyede bir kontrol et
     pollInterval.current = setInterval(async () => {
       try {
         const res = await fetch("/api/customer/wallet");
         if (res.ok) {
           const data = await res.json();
-          // Eğer sunucudaki reward sayısı, bizim state'teki reward sayısından az ise, ödül kullanılmış demektir!
           setWallet((prev) => {
             if (prev && data.wallet.rewards < prev.rewards) {
-              // İşlem başarılı!
               if (pollInterval.current) clearInterval(pollInterval.current);
               showSuccess("Ödülünüz Başarıyla Kullanıldı! Afiyet Olsun ☕");
             }
             return data.wallet;
           });
         }
-      } catch (err) {
-        // sessizce hata geç
-      }
+      } catch (err) {}
     }, 3000);
   };
-
 
   if (loading) return <div style={{ padding: "3rem", textAlign: "center" }}>Yükleniyor...</div>;
 
   const currentBeans = wallet?.beans || 0;
   const progress = Math.min(currentBeans, requiredCoffees);
-  const hasReward = wallet?.rewards && wallet.rewards > 0;
+  const hasReward = wallet?.rewards !== undefined && wallet.rewards > 0;
 
   return (
     <div style={{ 
@@ -178,7 +171,7 @@ export default function CustomerHome() {
         </Link>
       </div>
 
-      {/* Başlık ve Kahve İllüstrasyonu */}
+      {/* Başlık ve İllüstrasyon */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
         <h1 className="font-caveat" style={{ 
           fontSize: "3rem", 
@@ -190,7 +183,7 @@ export default function CustomerHome() {
           Hoş Geldin<br/>{session?.user?.name}
         </h1>
 
-        {/* Kahve Bardağı İllüstrasyonu & Ödül Göstergesi */}
+        {/* Kahve Bardağı İllüstrasyonu */}
         <div style={{ 
           width: "150px", 
           height: "200px", 
@@ -200,32 +193,6 @@ export default function CustomerHome() {
           justifyContent: "center",
           alignItems: "center"
         }}>
-          
-          {/* Ödül Rozeti (Yaratıcı Dokunuş) */}
-          {hasReward && (
-            <div style={{
-              position: "absolute",
-              top: "-20px",
-              right: "-30px",
-              backgroundColor: "#F59E0B", // Altın/Sarı
-              color: "white",
-              padding: "0.5rem",
-              borderRadius: "50%",
-              boxShadow: "0 0 15px rgba(245, 158, 11, 0.8)",
-              animation: "pulse 2s infinite",
-              zIndex: 10,
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              transform: "rotate(15deg)"
-            }}>
-              <Star size={24} fill="white" />
-              <div style={{ fontSize: "0.7rem", fontWeight: "bold", marginTop: "2px" }}>Ödül!</div>
-            </div>
-          )}
-
-          {/* Basit CSS Kahve Bardağı Çizimi */}
           <div style={{
             width: "120px",
             height: "160px",
@@ -272,56 +239,81 @@ export default function CustomerHome() {
           </div>
         </div>
 
-        {/* İlerleme Çubuğu */}
-        <div style={{ width: "100%", padding: "0 1rem", marginBottom: "4rem" }}>
-          <div style={{ 
-            display: "flex", 
-            justifyContent: "space-between", 
-            position: "relative",
-            alignItems: "center"
+        {/* DEV HEDİYE KUPONU veya İLERLEME ÇUBUĞU */}
+        {hasReward ? (
+          <div style={{
+            width: "100%",
+            padding: "1.5rem",
+            marginBottom: "4rem",
+            backgroundColor: "#F59E0B", // Altın rengi
+            borderRadius: "1rem",
+            border: "2px solid #B45309",
+            color: "white",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            boxShadow: "0 10px 25px rgba(245, 158, 11, 0.4)",
+            animation: "pulseGlow 2s infinite"
           }}>
-            <div style={{
-              position: "absolute",
-              top: "50%",
-              left: "0",
-              right: "0",
-              height: "2px",
-              backgroundColor: "#000",
-              zIndex: 0,
-              transform: "translateY(-50%)"
-            }}></div>
-
-            {Array.from({ length: requiredCoffees }).map((_, i) => (
-              <div key={i} style={{ 
-                zIndex: 1, 
-                backgroundColor: "var(--bg-primary)",
-                padding: "2px"
-              }}>
-                {i < progress ? (
-                  <div style={{
-                    width: "16px",
-                    height: "16px",
-                    backgroundColor: "#000",
-                    borderRadius: "50%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center"
-                  }}>
-                    <Check size={10} color="white" strokeWidth={4} />
-                  </div>
-                ) : (
-                  <div style={{
-                    width: "16px",
-                    height: "16px",
-                    backgroundColor: "white",
-                    border: "2px solid #000",
-                    borderRadius: "50%"
-                  }}></div>
-                )}
-              </div>
-            ))}
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+              <span style={{ fontSize: "0.875rem", fontWeight: "bold", opacity: 0.9 }}>Tebrikler!</span>
+              <span style={{ fontSize: "1.25rem", fontWeight: "bold", fontFamily: "var(--font-caveat)", letterSpacing: "1px" }}>
+                1 Ücretsiz Kahveniz Hazır ☕
+              </span>
+            </div>
+            <Gift size={40} color="white" />
           </div>
-        </div>
+        ) : (
+          <div style={{ width: "100%", padding: "0 1rem", marginBottom: "4rem" }}>
+            <div style={{ 
+              display: "flex", 
+              justifyContent: "space-between", 
+              position: "relative",
+              alignItems: "center"
+            }}>
+              <div style={{
+                position: "absolute",
+                top: "50%",
+                left: "0",
+                right: "0",
+                height: "2px",
+                backgroundColor: "#000",
+                zIndex: 0,
+                transform: "translateY(-50%)"
+              }}></div>
+
+              {Array.from({ length: requiredCoffees }).map((_, i) => (
+                <div key={i} style={{ 
+                  zIndex: 1, 
+                  backgroundColor: "var(--bg-primary)",
+                  padding: "2px"
+                }}>
+                  {i < progress ? (
+                    <div style={{
+                      width: "16px",
+                      height: "16px",
+                      backgroundColor: "#000",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}>
+                      <Check size={10} color="white" strokeWidth={4} />
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: "16px",
+                      height: "16px",
+                      backgroundColor: "white",
+                      border: "2px solid #000",
+                      borderRadius: "50%"
+                    }}></div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Butonlar */}
         <div style={{ width: "100%", maxWidth: "300px", display: "flex", flexDirection: "column", gap: "2rem" }}>
@@ -347,8 +339,12 @@ export default function CustomerHome() {
                 fontSize: "0.875rem", 
                 padding: "1rem 0",
                 opacity: hasReward ? 1 : 0.5,
-                boxShadow: hasReward ? "0 0 10px rgba(194, 155, 115, 0.8)" : "none",
-                cursor: hasReward ? "pointer" : "not-allowed"
+                backgroundColor: hasReward ? "#F59E0B" : "transparent",
+                color: hasReward ? "white" : "var(--primary)",
+                borderColor: hasReward ? "#B45309" : "var(--primary)",
+                boxShadow: hasReward ? "0 0 15px rgba(245, 158, 11, 0.6)" : "none",
+                cursor: hasReward ? "pointer" : "not-allowed",
+                fontWeight: hasReward ? "bold" : "normal"
               }}
               disabled={!hasReward}
             >
@@ -370,10 +366,7 @@ export default function CustomerHome() {
       {modalType !== "NONE" && (
         <div style={{
           position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
+          top: 0, left: 0, right: 0, bottom: 0,
           backgroundColor: "rgba(255, 255, 255, 0.8)",
           backdropFilter: "blur(5px)",
           zIndex: 100,
@@ -383,11 +376,11 @@ export default function CustomerHome() {
         }}>
           
           <div className="fade-in" style={{
-            width: "calc(100% - 100px)", // 50px sağdan soldan margin
+            width: "calc(100% - 100px)",
             maxWidth: "400px",
             backgroundColor: "white",
             border: "2px solid #000",
-            borderRadius: "2rem", // Oval köşeler
+            borderRadius: "2rem",
             padding: "2rem 1.5rem",
             position: "relative",
             boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
@@ -397,24 +390,12 @@ export default function CustomerHome() {
             textAlign: "center"
           }}>
             
-            {/* Kapat Butonu (Success değilse göster) */}
             {modalType !== "SUCCESS" && (
-              <button 
-                onClick={closeModal}
-                style={{
-                  position: "absolute",
-                  top: "1rem",
-                  right: "1rem",
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer"
-                }}
-              >
+              <button onClick={closeModal} style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", cursor: "pointer" }}>
                 <X size={24} color="#000" />
               </button>
             )}
 
-            {/* İçerik: SCAN */}
             {modalType === "SCAN" && (
               <>
                 <h2 className="font-caveat" style={{ fontSize: "2rem", marginBottom: "1.5rem" }}>Barkod Okut</h2>
@@ -427,7 +408,6 @@ export default function CustomerHome() {
               </>
             )}
 
-            {/* İçerik: REDEEM */}
             {modalType === "REDEEM" && (
               <>
                 <h2 className="font-caveat" style={{ fontSize: "2rem", marginBottom: "1.5rem" }}>Ödül Kodunuz</h2>
@@ -440,7 +420,6 @@ export default function CustomerHome() {
               </>
             )}
 
-            {/* İçerik: CAMPAIGNS */}
             {modalType === "CAMPAIGNS" && (
               <>
                 <h2 className="font-caveat" style={{ fontSize: "2rem", marginBottom: "1.5rem" }}>Kampanyalar</h2>
@@ -459,19 +438,13 @@ export default function CustomerHome() {
               </>
             )}
 
-            {/* İçerik: SUCCESS */}
             {modalType === "SUCCESS" && (
               <>
                 <div style={{
-                  width: "80px",
-                  height: "80px",
-                  borderRadius: "50%",
-                  backgroundColor: "var(--success)",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  marginBottom: "1.5rem",
-                  animation: "fadeIn 0.5s ease-out"
+                  width: "80px", height: "80px", borderRadius: "50%",
+                  backgroundColor: "var(--success)", display: "flex",
+                  alignItems: "center", justifyContent: "center",
+                  marginBottom: "1.5rem", animation: "fadeIn 0.5s ease-out"
                 }}>
                   <Check size={40} color="white" strokeWidth={4} />
                 </div>
@@ -485,12 +458,12 @@ export default function CustomerHome() {
         </div>
       )}
 
-      {/* Global animasyon (pulse) eklentisi */}
+      {/* Global animasyonlar */}
       <style dangerouslySetInnerHTML={{__html: `
-        @keyframes pulse {
-          0% { transform: scale(1) rotate(15deg); }
-          50% { transform: scale(1.1) rotate(15deg); }
-          100% { transform: scale(1) rotate(15deg); }
+        @keyframes pulseGlow {
+          0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); transform: scale(1); }
+          50% { box-shadow: 0 0 20px 10px rgba(245, 158, 11, 0); transform: scale(1.02); }
+          100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); transform: scale(1); }
         }
       `}} />
     </div>
