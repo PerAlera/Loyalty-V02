@@ -1,30 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { User, Coffee, Check, Circle } from "lucide-react";
+import { User, Check, X, Star } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { QRCodeSVG } from "qrcode.react";
+
+type ModalType = "NONE" | "SCAN" | "REDEEM" | "CAMPAIGNS" | "SUCCESS";
 
 export default function CustomerHome() {
   const { data: session } = useSession();
   const router = useRouter();
   const [wallet, setWallet] = useState<{ beans: number, rewards: number } | null>(null);
+  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  // Modal states
+  const [modalType, setModalType] = useState<ModalType>("NONE");
+  const [successMessage, setSuccessMessage] = useState("");
+  const [redeemToken, setRedeemToken] = useState<string | null>(null);
 
-  // Tasarıma göre 8 kahve gereksinimi var gibi duruyor, şimdilik sabit veya API'dan
+  // Polling ref
+  const pollInterval = useRef<NodeJS.Timeout | null>(null);
+
   const requiredCoffees = 8; 
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchData = async () => {
     try {
-      const res = await fetch("/api/customer/wallet");
-      if (res.ok) {
-        const data = await res.json();
+      const [walletRes, announcementsRes] = await Promise.all([
+        fetch("/api/customer/wallet"),
+        fetch("/api/announcements")
+      ]);
+      if (walletRes.ok) {
+        const data = await walletRes.json();
         setWallet(data.wallet);
+      }
+      if (announcementsRes.ok) {
+        const data = await announcementsRes.json();
+        setAnnouncements(data.announcements || []);
       }
     } catch (e) {
       console.error(e);
@@ -32,10 +52,97 @@ export default function CustomerHome() {
     setLoading(false);
   };
 
+  // Modal helpers
+  const openModal = (type: ModalType) => setModalType(type);
+  const closeModal = () => {
+    setModalType("NONE");
+    setRedeemToken(null);
+    if (pollInterval.current) {
+      clearInterval(pollInterval.current);
+      pollInterval.current = null;
+    }
+  };
+
+  const showSuccess = (msg: string) => {
+    setSuccessMessage(msg);
+    setModalType("SUCCESS");
+    setTimeout(() => {
+      closeModal();
+    }, 2500); // 2.5 saniye sonra kapat
+  };
+
+  // --- SCAN (QR Okut Kazan) Logic ---
+  const handleScan = async (scannedData: string) => {
+    // Okuma yapıldığında hemen kamerayı durdurmak için modu değiştir
+    setModalType("NONE"); 
+    try {
+      const res = await fetch("/api/customer/qr/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: scannedData })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setWallet({ beans: data.newBeans, rewards: data.newRewards });
+        showSuccess("Puan Başarıyla Eklendi!");
+      } else {
+        alert(data.error || "Hata oluştu.");
+      }
+    } catch (err) {
+      alert("Okuma başarısız");
+    }
+  };
+
+  // --- REDEEM (Ödül Kullan) Logic ---
+  const handleOpenRedeem = async () => {
+    if (!wallet?.rewards || wallet.rewards < 1) return;
+    
+    try {
+      const res = await fetch("/api/customer/qr/generate", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setRedeemToken(data.token);
+        openModal("REDEEM");
+        startPollingForRedeem();
+      } else {
+        alert(data.error);
+      }
+    } catch (err) {
+      alert("Bir hata oluştu");
+    }
+  };
+
+  const startPollingForRedeem = () => {
+    if (pollInterval.current) clearInterval(pollInterval.current);
+    
+    // Her 3 saniyede bir kontrol et
+    pollInterval.current = setInterval(async () => {
+      try {
+        const res = await fetch("/api/customer/wallet");
+        if (res.ok) {
+          const data = await res.json();
+          // Eğer sunucudaki reward sayısı, bizim state'teki reward sayısından az ise, ödül kullanılmış demektir!
+          setWallet((prev) => {
+            if (prev && data.wallet.rewards < prev.rewards) {
+              // İşlem başarılı!
+              if (pollInterval.current) clearInterval(pollInterval.current);
+              showSuccess("Ödülünüz Başarıyla Kullanıldı! Afiyet Olsun ☕");
+            }
+            return data.wallet;
+          });
+        }
+      } catch (err) {
+        // sessizce hata geç
+      }
+    }, 3000);
+  };
+
+
   if (loading) return <div style={{ padding: "3rem", textAlign: "center" }}>Yükleniyor...</div>;
 
   const currentBeans = wallet?.beans || 0;
   const progress = Math.min(currentBeans, requiredCoffees);
+  const hasReward = wallet?.rewards && wallet.rewards > 0;
 
   return (
     <div style={{ 
@@ -43,7 +150,8 @@ export default function CustomerHome() {
       display: "flex", 
       flexDirection: "column",
       padding: "2rem 1.5rem",
-      backgroundColor: "var(--bg-primary)"
+      backgroundColor: "var(--bg-primary)",
+      position: "relative"
     }}>
       
       {/* Üst Bar: Logo ve Profil */}
@@ -82,7 +190,7 @@ export default function CustomerHome() {
           Hoş Geldin<br/>{session?.user?.name}
         </h1>
 
-        {/* Kahve Bardağı (İllüstrasyon yer tutucu) */}
+        {/* Kahve Bardağı İllüstrasyonu & Ödül Göstergesi */}
         <div style={{ 
           width: "150px", 
           height: "200px", 
@@ -92,11 +200,36 @@ export default function CustomerHome() {
           justifyContent: "center",
           alignItems: "center"
         }}>
+          
+          {/* Ödül Rozeti (Yaratıcı Dokunuş) */}
+          {hasReward && (
+            <div style={{
+              position: "absolute",
+              top: "-20px",
+              right: "-30px",
+              backgroundColor: "#F59E0B", // Altın/Sarı
+              color: "white",
+              padding: "0.5rem",
+              borderRadius: "50%",
+              boxShadow: "0 0 15px rgba(245, 158, 11, 0.8)",
+              animation: "pulse 2s infinite",
+              zIndex: 10,
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              transform: "rotate(15deg)"
+            }}>
+              <Star size={24} fill="white" />
+              <div style={{ fontSize: "0.7rem", fontWeight: "bold", marginTop: "2px" }}>Ödül!</div>
+            </div>
+          )}
+
           {/* Basit CSS Kahve Bardağı Çizimi */}
           <div style={{
             width: "120px",
             height: "160px",
-            backgroundColor: "#E6D5C3", // Bardak rengi
+            backgroundColor: "#E6D5C3",
             border: "4px solid #000",
             borderRadius: "10px 10px 40px 40px",
             position: "relative",
@@ -104,7 +237,6 @@ export default function CustomerHome() {
             flexDirection: "column",
             alignItems: "center"
           }}>
-            {/* Kapak */}
             <div style={{
               width: "140px",
               height: "20px",
@@ -124,7 +256,6 @@ export default function CustomerHome() {
               position: "absolute",
               top: "-30px"
             }}></div>
-            {/* Etiket */}
             <div style={{
               width: "100%",
               height: "60px",
@@ -136,13 +267,12 @@ export default function CustomerHome() {
               justifyContent: "center",
               alignItems: "center"
             }}>
-              {/* Kalp */}
               <div style={{ color: "#EF4444", fontSize: "1.5rem" }}>❤️</div>
             </div>
           </div>
         </div>
 
-        {/* İlerleme Çubuğu (Progress Bar) */}
+        {/* İlerleme Çubuğu */}
         <div style={{ width: "100%", padding: "0 1rem", marginBottom: "4rem" }}>
           <div style={{ 
             display: "flex", 
@@ -150,7 +280,6 @@ export default function CustomerHome() {
             position: "relative",
             alignItems: "center"
           }}>
-            {/* Arka plan çizgisi */}
             <div style={{
               position: "absolute",
               top: "50%",
@@ -162,7 +291,6 @@ export default function CustomerHome() {
               transform: "translateY(-50%)"
             }}></div>
 
-            {/* Adımlar */}
             {Array.from({ length: requiredCoffees }).map((_, i) => (
               <div key={i} style={{ 
                 zIndex: 1, 
@@ -200,7 +328,7 @@ export default function CustomerHome() {
           
           <button 
             className="btn-primary" 
-            onClick={() => router.push("/dashboard/customer/qr")}
+            onClick={() => openModal("SCAN")}
             style={{ 
               padding: "1.25rem", 
               fontSize: "1.25rem", 
@@ -214,14 +342,21 @@ export default function CustomerHome() {
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
             <button 
               className="btn-secondary" 
-              onClick={() => router.push("/dashboard/customer/qr?mode=redeem")}
-              style={{ fontSize: "0.875rem", padding: "1rem 0" }}
+              onClick={handleOpenRedeem}
+              style={{ 
+                fontSize: "0.875rem", 
+                padding: "1rem 0",
+                opacity: hasReward ? 1 : 0.5,
+                boxShadow: hasReward ? "0 0 10px rgba(194, 155, 115, 0.8)" : "none",
+                cursor: hasReward ? "pointer" : "not-allowed"
+              }}
+              disabled={!hasReward}
             >
               Ödül Kullan
             </button>
             <button 
               className="btn-secondary" 
-              onClick={() => router.push("/dashboard/customer/history")}
+              onClick={() => openModal("CAMPAIGNS")}
               style={{ fontSize: "0.875rem", padding: "1rem 0" }}
             >
               Kampanyalar
@@ -230,6 +365,134 @@ export default function CustomerHome() {
           
         </div>
       </div>
+
+      {/* MODAL (Pop-up) YAPI */}
+      {modalType !== "NONE" && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(255, 255, 255, 0.8)",
+          backdropFilter: "blur(5px)",
+          zIndex: 100,
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}>
+          
+          <div className="fade-in" style={{
+            width: "calc(100% - 100px)", // 50px sağdan soldan margin
+            maxWidth: "400px",
+            backgroundColor: "white",
+            border: "2px solid #000",
+            borderRadius: "2rem", // Oval köşeler
+            padding: "2rem 1.5rem",
+            position: "relative",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center"
+          }}>
+            
+            {/* Kapat Butonu (Success değilse göster) */}
+            {modalType !== "SUCCESS" && (
+              <button 
+                onClick={closeModal}
+                style={{
+                  position: "absolute",
+                  top: "1rem",
+                  right: "1rem",
+                  background: "none",
+                  border: "none",
+                  cursor: "pointer"
+                }}
+              >
+                <X size={24} color="#000" />
+              </button>
+            )}
+
+            {/* İçerik: SCAN */}
+            {modalType === "SCAN" && (
+              <>
+                <h2 className="font-caveat" style={{ fontSize: "2rem", marginBottom: "1.5rem" }}>Barkod Okut</h2>
+                <div style={{ width: "100%", borderRadius: "1rem", overflow: "hidden", border: "2px solid var(--primary)" }}>
+                  <Scanner onScan={(result) => handleScan(result[0].rawValue)} />
+                </div>
+                <p style={{ marginTop: "1rem", color: "var(--text-secondary)", fontSize: "0.875rem" }}>
+                  Kasiyerin gösterdiği kodu taratın.
+                </p>
+              </>
+            )}
+
+            {/* İçerik: REDEEM */}
+            {modalType === "REDEEM" && (
+              <>
+                <h2 className="font-caveat" style={{ fontSize: "2rem", marginBottom: "1.5rem" }}>Ödül Kodunuz</h2>
+                <div style={{ padding: "1rem", background: "white", borderRadius: "1rem", border: "2px solid var(--primary)" }}>
+                  {redeemToken && <QRCodeSVG value={redeemToken} size={180} />}
+                </div>
+                <p style={{ marginTop: "1.5rem", color: "var(--text-secondary)", fontSize: "0.875rem" }}>
+                  Bu kodu kasiyere gösterin. Kod okunduğunda bu ekran otomatik kapanacaktır.
+                </p>
+              </>
+            )}
+
+            {/* İçerik: CAMPAIGNS */}
+            {modalType === "CAMPAIGNS" && (
+              <>
+                <h2 className="font-caveat" style={{ fontSize: "2rem", marginBottom: "1.5rem" }}>Kampanyalar</h2>
+                {announcements.length > 0 ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "1rem", width: "100%", maxHeight: "300px", overflowY: "auto" }}>
+                    {announcements.map((ann) => (
+                      <div key={ann.id} style={{ padding: "1rem", border: "1px solid var(--border-color)", borderRadius: "1rem", textAlign: "left" }}>
+                        <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem" }}>{ann.title}</h3>
+                        <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>{ann.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p style={{ color: "var(--text-secondary)" }}>Şu an aktif kampanya bulunmuyor.</p>
+                )}
+              </>
+            )}
+
+            {/* İçerik: SUCCESS */}
+            {modalType === "SUCCESS" && (
+              <>
+                <div style={{
+                  width: "80px",
+                  height: "80px",
+                  borderRadius: "50%",
+                  backgroundColor: "var(--success)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: "1.5rem",
+                  animation: "fadeIn 0.5s ease-out"
+                }}>
+                  <Check size={40} color="white" strokeWidth={4} />
+                </div>
+                <h2 className="font-caveat" style={{ fontSize: "2rem", color: "var(--success)", lineHeight: 1.2 }}>
+                  {successMessage}
+                </h2>
+              </>
+            )}
+
+          </div>
+        </div>
+      )}
+
+      {/* Global animasyon (pulse) eklentisi */}
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes pulse {
+          0% { transform: scale(1) rotate(15deg); }
+          50% { transform: scale(1.1) rotate(15deg); }
+          100% { transform: scale(1) rotate(15deg); }
+        }
+      `}} />
     </div>
   );
 }

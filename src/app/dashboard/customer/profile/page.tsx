@@ -1,10 +1,12 @@
 "use client";
 import { signOut, useSession } from "next-auth/react";
-import { User, Bell, Heart, Moon, HelpCircle } from "lucide-react";
+import { User, Bell, Heart, Moon, HelpCircle, History as HistoryIcon } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
+  const router = useRouter();
   const [wallet, setWallet] = useState<{ beans: number } | null>(null);
 
   useEffect(() => {
@@ -35,12 +37,13 @@ export default function ProfilePage() {
 
       <div className="surface-card" style={{ padding: "0.5rem 1.5rem" }}>
         {[
-          { icon: Bell, label: "Bildirimler" },
-          { icon: Heart, label: "Favori Mekanlarım" },
-          { icon: HelpCircle, label: "Destek" },
-          { icon: Moon, label: "Tema" }
+          { icon: HistoryIcon, label: "Geçmiş İşlemlerim", href: "/dashboard/customer/history" },
+          { icon: Bell, label: "Bildirimler", href: "#" },
+          { icon: Heart, label: "Favori Mekanlarım", href: "#" },
+          { icon: HelpCircle, label: "Destek", href: "#" },
+          { icon: Moon, label: "Tema", href: "#" }
         ].map((item, i) => (
-          <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem 0", borderBottom: i < 3 ? "1px solid var(--border-color)" : "none", cursor: "pointer" }}>
+          <div key={i} onClick={() => { if(item.href !== "#") router.push(item.href); }} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "1.25rem 0", borderBottom: i < 4 ? "1px solid var(--border-color)" : "none", cursor: "pointer" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
               <item.icon size={20} color="var(--text-secondary)" />
               <span style={{ fontWeight: 500 }}>{item.label}</span>
