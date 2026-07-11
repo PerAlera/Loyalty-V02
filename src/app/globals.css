@@ -1,15 +1,15 @@
 :root {
-  /* Renk Paleti (CEP Design System) */
-  --bg-primary: #F8FAFC; 
+  /* Renk Paleti (Jay's Cafe Design System) */
+  --bg-primary: #FFFFFF; 
   --bg-secondary: #FFFFFF;
-  --text-primary: #0F172A; 
-  --text-secondary: #64748B; 
+  --text-primary: #000000; 
+  --text-secondary: #4A4A4A; 
   
-  --primary: #3A7AFE; /* Mavi */
-  --primary-hover: #2563EB;
+  --primary: #654321; /* Koyu Kahve (Ana buton) */
+  --primary-hover: #4A3015;
   
-  --secondary: #7C3AED; /* Mor */
-  --secondary-hover: #6D28D9;
+  --secondary: #C29B73; /* Karamel/Sütlü Kahve (Alt butonlar) */
+  --secondary-hover: #A8815A;
   
   --success: #22C55E;
   --danger: #EF4444;
@@ -23,13 +23,14 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg-primary: #0F172A;
-    --bg-secondary: #1E293B;
-    --text-primary: #F8FAFC;
-    --text-secondary: #94A3B8;
+    /* Karanlık mod istenmedi, ancak her ihtimale karşı temiz tutuyoruz */
+    --bg-primary: #FFFFFF;
+    --bg-secondary: #F8FAFC;
+    --text-primary: #000000;
+    --text-secondary: #4A4A4A;
     
-    --border-color: #334155;
-    --surface-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.2);
+    --border-color: #E2E8F0;
+    --surface-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.1);
   }
 }
 
@@ -38,6 +39,11 @@
   padding: 0;
   margin: 0;
   font-family: var(--font-inter), sans-serif;
+}
+
+/* Özel Font Sınıfları */
+.font-caveat {
+  font-family: var(--font-caveat), cursive;
 }
 
 body {
@@ -57,13 +63,13 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 a {
-  color: var(--accent-color);
+  color: var(--primary);
   text-decoration: none;
   transition: color 0.2s ease;
 }
 
 a:hover {
-  color: var(--accent-hover);
+  color: var(--primary-hover);
 }
 
 /* Genel Sınıflar */
@@ -88,9 +94,9 @@ a:hover {
   background-color: var(--primary);
   color: white;
   border: none;
-  border-radius: 0.75rem;
-  padding: 0.875rem 1.5rem;
-  font-size: 1rem;
+  border-radius: 9999px; /* Tam yuvarlak pill-shape */
+  padding: 1rem 2rem;
+  font-size: 1.125rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -101,22 +107,47 @@ a:hover {
 
 .btn-primary:hover {
   background-color: var(--primary-hover);
+  transform: translateY(-2px);
 }
 
 .btn-secondary {
-  background-color: transparent;
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
-  border-radius: 0.75rem;
+  background-color: var(--secondary);
+  color: white;
+  border: none;
+  border-radius: 9999px; /* Tam yuvarlak pill-shape */
   padding: 0.875rem 1.5rem;
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
+  display: inline-block;
+  text-align: center;
+  width: 100%;
 }
 
 .btn-secondary:hover {
-  background-color: var(--bg-primary);
+  background-color: var(--secondary-hover);
+  transform: translateY(-2px);
+}
+
+.btn-outline {
+  background-color: transparent;
+  color: var(--primary);
+  border: 2px solid var(--primary);
+  border-radius: 9999px;
+  padding: 0.875rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-block;
+  text-align: center;
+  width: 100%;
+}
+
+.btn-outline:hover {
+  background-color: var(--primary);
+  color: white;
 }
 
 /* Form Elemanları */
@@ -133,9 +164,9 @@ a:hover {
 
 .form-input {
   width: 100%;
-  padding: 0.875rem 1rem;
-  border-radius: 0.75rem;
-  border: 1px solid var(--text-secondary);
+  padding: 1rem 1.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--border-color);
   background-color: transparent;
   color: var(--text-primary);
   font-size: 1rem;
@@ -144,7 +175,7 @@ a:hover {
 
 .form-input:focus {
   outline: none;
-  border-color: var(--accent-color);
+  border-color: var(--primary);
 }
 
 /* Animasyonlar */

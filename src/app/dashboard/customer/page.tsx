@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Bell, Coffee, ChevronRight, Gift } from "lucide-react";
+import { User, Coffee, Check, Circle } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
@@ -10,11 +10,10 @@ export default function CustomerHome() {
   const { data: session } = useSession();
   const router = useRouter();
   const [wallet, setWallet] = useState<{ beans: number, rewards: number } | null>(null);
-  const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // Patron ayarlarından gelecek, şimdilik varsayılan 10
-  const requiredCoffees = 10; 
+  // Tasarıma göre 8 kahve gereksinimi var gibi duruyor, şimdilik sabit veya API'dan
+  const requiredCoffees = 8; 
 
   useEffect(() => {
     fetchData();
@@ -22,17 +21,10 @@ export default function CustomerHome() {
 
   const fetchData = async () => {
     try {
-      const [walletRes, announcementsRes] = await Promise.all([
-        fetch("/api/customer/wallet"),
-        fetch("/api/announcements")
-      ]);
-      if (walletRes.ok) {
-        const data = await walletRes.json();
+      const res = await fetch("/api/customer/wallet");
+      if (res.ok) {
+        const data = await res.json();
         setWallet(data.wallet);
-      }
-      if (announcementsRes.ok) {
-        const data = await announcementsRes.json();
-        setAnnouncements(data.announcements || []);
       }
     } catch (e) {
       console.error(e);
@@ -46,122 +38,198 @@ export default function CustomerHome() {
   const progress = Math.min(currentBeans, requiredCoffees);
 
   return (
-    <div className="container" style={{ paddingTop: "2rem", paddingBottom: "6rem" }}>
+    <div style={{ 
+      minHeight: "100vh", 
+      display: "flex", 
+      flexDirection: "column",
+      padding: "2rem 1.5rem",
+      backgroundColor: "var(--bg-primary)"
+    }}>
       
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
-        <div>
-          <div style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>Merhaba</div>
-          <h1 style={{ fontSize: "1.5rem", marginBottom: 0 }}>{session?.user?.name} 👋</h1>
+      {/* Üst Bar: Logo ve Profil */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "3rem" }}>
+        <div style={{ 
+          fontFamily: "var(--font-caveat)", 
+          fontSize: "2rem", 
+          fontWeight: "bold",
+          border: "2px solid var(--primary)",
+          borderRadius: "50%",
+          width: "60px",
+          height: "60px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          textAlign: "center",
+          lineHeight: 1,
+          color: "var(--primary)"
+        }}>
+          Jay's<br/><span style={{fontSize: "1rem"}}>Cafe</span>
         </div>
-        <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "var(--bg-secondary)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "var(--surface-shadow)" }}>
-          <Bell size={20} color="var(--text-primary)" />
-        </div>
-      </div>
-
-      {/* Loyalty Card (Mor Tasarım) */}
-      <div style={{ 
-        background: "linear-gradient(135deg, var(--secondary) 0%, var(--secondary-hover) 100%)",
-        borderRadius: "1.5rem",
-        padding: "1.5rem",
-        color: "white",
-        marginBottom: "2rem",
-        boxShadow: "0 10px 25px -5px rgba(124, 58, 237, 0.4)"
-      }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "1.5rem" }}>
-          <div>
-            <h2 style={{ fontSize: "1.25rem", margin: 0 }}>Coffee House</h2>
-            <div style={{ fontSize: "0.875rem", opacity: 0.8 }}>Sadakat Kartı</div>
-          </div>
-          <Coffee size={24} opacity={0.8} />
-        </div>
-
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "1rem" }}>
-          <div style={{ fontSize: "2rem", fontWeight: "bold" }}>
-            {progress} <span style={{ fontSize: "1rem", opacity: 0.8, fontWeight: "normal" }}>/ {requiredCoffees}</span>
-          </div>
-          {wallet?.rewards && wallet.rewards > 0 ? (
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", background: "white", color: "var(--secondary)", padding: "0.25rem 0.75rem", borderRadius: "1rem", fontSize: "0.875rem", fontWeight: "bold" }}>
-              <Gift size={16} /> {wallet.rewards} Ödül
-            </div>
-          ) : null}
-        </div>
-
-        {/* Cup Progress Icons */}
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "2rem" }}>
-          {Array.from({ length: 5 }).map((_, i) => (
-            <div key={i} style={{ opacity: i < (progress / 2) ? 1 : 0.3 }}>
-              <Coffee size={24} fill={i < (progress / 2) ? "white" : "none"} />
-            </div>
-          ))}
-        </div>
-
-        <button 
-          onClick={() => router.push("/dashboard/customer/qr")}
-          style={{ 
-            width: "100%", 
-            padding: "0.875rem", 
-            backgroundColor: "white", 
-            color: "var(--secondary)", 
-            border: "none", 
-            borderRadius: "0.75rem",
-            fontWeight: "bold",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "0.5rem",
-            cursor: "pointer"
-          }}
-        >
-          {wallet?.rewards && wallet.rewards > 0 ? "Ödül Kullan (QR)" : "Puan Kazan (QR Okut)"}
-        </button>
-      </div>
-
-      {/* Yakındaki Kampanyalar */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-        <h2 style={{ fontSize: "1.125rem", margin: 0 }}>Güncel Kampanyalar</h2>
-      </div>
-      
-      {announcements.length > 0 ? (
-        <div style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "2rem" }}>
-          {announcements.map((ann) => (
-            <div key={ann.id} className="surface-card" style={{ display: "flex", gap: "1rem", padding: "1rem" }}>
-              <div style={{ width: "60px", height: "60px", borderRadius: "0.75rem", backgroundColor: "var(--bg-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-                <Coffee size={24} color="var(--primary)" />
-              </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: "1rem", marginBottom: "0.25rem" }}>{ann.title}</h3>
-                <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{ann.content}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>Şu an aktif kampanya bulunmuyor.</p>
-      )}
-
-      {/* Son Ziyaretler (Kısa) */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-        <h2 style={{ fontSize: "1.125rem", margin: 0 }}>Hızlı Geçmiş</h2>
-        <Link href="/dashboard/customer/history" style={{ fontSize: "0.875rem", color: "var(--primary)", display: "flex", alignItems: "center" }}>
-          Tümünü Gör <ChevronRight size={16} />
+        <Link href="/dashboard/customer/profile" style={{ color: "var(--text-primary)" }}>
+          <User size={32} strokeWidth={1.5} />
         </Link>
       </div>
-      <div className="surface-card" style={{ padding: "1rem" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
-            <div style={{ width: "40px", height: "40px", borderRadius: "50%", backgroundColor: "var(--bg-primary)", display: "flex", alignItems: "center", justifyContent: "center" }}>
-              <Coffee size={20} color="var(--text-primary)" />
-            </div>
-            <div>
-              <div style={{ fontWeight: 600 }}>Cüzdan Durumu</div>
-              <div style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>Toplam Puanınız</div>
+
+      {/* Başlık ve Kahve İllüstrasyonu */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center" }}>
+        <h1 className="font-caveat" style={{ 
+          fontSize: "3rem", 
+          textAlign: "center", 
+          lineHeight: 1.1, 
+          marginBottom: "2rem",
+          color: "var(--text-primary)"
+        }}>
+          Hoş Geldin<br/>{session?.user?.name}
+        </h1>
+
+        {/* Kahve Bardağı (İllüstrasyon yer tutucu) */}
+        <div style={{ 
+          width: "150px", 
+          height: "200px", 
+          position: "relative", 
+          marginBottom: "2.5rem",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center"
+        }}>
+          {/* Basit CSS Kahve Bardağı Çizimi */}
+          <div style={{
+            width: "120px",
+            height: "160px",
+            backgroundColor: "#E6D5C3", // Bardak rengi
+            border: "4px solid #000",
+            borderRadius: "10px 10px 40px 40px",
+            position: "relative",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center"
+          }}>
+            {/* Kapak */}
+            <div style={{
+              width: "140px",
+              height: "20px",
+              backgroundColor: "#8C715A",
+              border: "4px solid #000",
+              borderRadius: "10px",
+              position: "absolute",
+              top: "-20px"
+            }}></div>
+            <div style={{
+              width: "120px",
+              height: "10px",
+              backgroundColor: "#8C715A",
+              border: "4px solid #000",
+              borderBottom: "none",
+              borderRadius: "10px 10px 0 0",
+              position: "absolute",
+              top: "-30px"
+            }}></div>
+            {/* Etiket */}
+            <div style={{
+              width: "100%",
+              height: "60px",
+              backgroundColor: "#C29B73",
+              borderTop: "4px solid #000",
+              borderBottom: "4px solid #000",
+              marginTop: "40px",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center"
+            }}>
+              {/* Kalp */}
+              <div style={{ color: "#EF4444", fontSize: "1.5rem" }}>❤️</div>
             </div>
           </div>
-          <div style={{ fontWeight: "bold", color: "var(--success)" }}>+{wallet?.beans || 0} Puan</div>
+        </div>
+
+        {/* İlerleme Çubuğu (Progress Bar) */}
+        <div style={{ width: "100%", padding: "0 1rem", marginBottom: "4rem" }}>
+          <div style={{ 
+            display: "flex", 
+            justifyContent: "space-between", 
+            position: "relative",
+            alignItems: "center"
+          }}>
+            {/* Arka plan çizgisi */}
+            <div style={{
+              position: "absolute",
+              top: "50%",
+              left: "0",
+              right: "0",
+              height: "2px",
+              backgroundColor: "#000",
+              zIndex: 0,
+              transform: "translateY(-50%)"
+            }}></div>
+
+            {/* Adımlar */}
+            {Array.from({ length: requiredCoffees }).map((_, i) => (
+              <div key={i} style={{ 
+                zIndex: 1, 
+                backgroundColor: "var(--bg-primary)",
+                padding: "2px"
+              }}>
+                {i < progress ? (
+                  <div style={{
+                    width: "16px",
+                    height: "16px",
+                    backgroundColor: "#000",
+                    borderRadius: "50%",
+                    display: "flex",
+                    justifyContent: "center",
+                    alignItems: "center"
+                  }}>
+                    <Check size={10} color="white" strokeWidth={4} />
+                  </div>
+                ) : (
+                  <div style={{
+                    width: "16px",
+                    height: "16px",
+                    backgroundColor: "white",
+                    border: "2px solid #000",
+                    borderRadius: "50%"
+                  }}></div>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Butonlar */}
+        <div style={{ width: "100%", maxWidth: "300px", display: "flex", flexDirection: "column", gap: "2rem" }}>
+          
+          <button 
+            className="btn-primary" 
+            onClick={() => router.push("/dashboard/customer/qr")}
+            style={{ 
+              padding: "1.25rem", 
+              fontSize: "1.25rem", 
+              boxShadow: "0 4px 14px rgba(101, 67, 33, 0.4)",
+              lineHeight: 1.2
+            }}
+          >
+            Qr Okut<br/>Kazan
+          </button>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            <button 
+              className="btn-secondary" 
+              onClick={() => router.push("/dashboard/customer/qr?mode=redeem")}
+              style={{ fontSize: "0.875rem", padding: "1rem 0" }}
+            >
+              Ödül Kullan
+            </button>
+            <button 
+              className="btn-secondary" 
+              onClick={() => router.push("/dashboard/customer/history")}
+              style={{ fontSize: "0.875rem", padding: "1rem 0" }}
+            >
+              Kampanyalar
+            </button>
+          </div>
+          
         </div>
       </div>
-
     </div>
   );
 }

@@ -48,9 +48,9 @@ export default function RegisterPage() {
 
   return (
     <div className={styles.authContainer}>
-      <div className={`glass-panel fade-in ${styles.authCard}`}>
+      <div className={`fade-in ${styles.authCard}`}>
         <h1 className={styles.authTitle}>Kayıt Ol</h1>
-        <p className={styles.authSubtitle}>Yeni bir hesap oluşturun.</p>
+        <p className={styles.authSubtitle}>Yeni bir Jay's Cafe hesabı oluşturun.</p>
 
         {error && <div className={styles.errorText}>{error}</div>}
 

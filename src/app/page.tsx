@@ -40,12 +40,30 @@ export default function Home() {
   }
 
   return (
-    <main className={styles.main}>
+    <main className={styles.main} style={{ backgroundColor: "var(--bg-primary)", minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
       <div className="container fade-in">
-        <div className={`glass-panel ${styles.hero}`}>
-          <h1 className={styles.title}>Loyalty App'e Hoş Geldiniz</h1>
-          <p className={styles.subtitle}>Modern, hızlı ve premium dijital sadakat sistemi.</p>
-          <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+        <div className={styles.hero} style={{ textAlign: "center", padding: "2rem" }}>
+          <div style={{ 
+            fontFamily: "var(--font-caveat)", 
+            fontSize: "2rem", 
+            fontWeight: "bold",
+            border: "2px solid var(--primary)",
+            borderRadius: "50%",
+            width: "80px",
+            height: "80px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            textAlign: "center",
+            lineHeight: 1,
+            color: "var(--primary)",
+            margin: "0 auto 2rem auto"
+          }}>
+            Jay's<br/><span style={{fontSize: "1rem"}}>Cafe</span>
+          </div>
+          <h1 className="font-caveat" style={{ fontSize: "3.5rem", marginBottom: "1rem", color: "var(--text-primary)", lineHeight: 1 }}>Sana Özel<br/>Sadakat Sistemi</h1>
+          <p style={{ color: "var(--text-secondary)", marginBottom: "3rem", fontSize: "1.125rem" }}>Kahveni iç, puanını topla, bedava kahveni kazan!</p>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1rem", maxWidth: "300px", margin: "0 auto" }}>
             <Link href="/login" className="btn-primary">Giriş Yap</Link>
             <Link href="/register" className="btn-secondary">Kayıt Ol</Link>
           </div>

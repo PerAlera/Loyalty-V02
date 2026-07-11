@@ -35,9 +35,9 @@ export default function LoginPage() {
 
   return (
     <div className={styles.authContainer}>
-      <div className={`glass-panel fade-in ${styles.authCard}`}>
-        <h1 className={styles.authTitle}>Giriş Yap</h1>
-        <p className={styles.authSubtitle}>Hesabınıza erişmek için bilgilerinizi girin.</p>
+      <div className={`fade-in ${styles.authCard}`}>
+        <h1 className={styles.authTitle}>Jay's Cafe</h1>
+        <p className={styles.authSubtitle}>Giriş yapmak için bilgilerinizi girin.</p>
 
         {error && <div className={styles.errorText}>{error}</div>}
 
