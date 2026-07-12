@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "next-auth/react";
 import { Users, Gift, Coffee, Calendar, Clock, Activity, PieChart as PieChartIcon, BarChart2, TrendingUp, Sun } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
@@ -32,9 +32,6 @@ export default function OwnerDashboard() {
     <div className="container" style={{ paddingTop: "2rem", paddingBottom: "6rem" }}>
       <div className="dashboard-header" style={{ marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h1 style={{ color: "var(--text-primary)", fontSize: "1.5rem", fontWeight: "bold", margin: 0 }}>Admin Paneli</h1>
-        <button className="btn-secondary" onClick={() => signOut({ callbackUrl: '/' })} style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", borderColor: "var(--danger)", color: "var(--danger)" }}>
-          Çıkış Yap
-        </button>
       </div>
 
       {/* 1. BUGÜNÜN ÖZETİ */}

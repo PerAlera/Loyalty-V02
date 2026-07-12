@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Settings, Save } from "lucide-react";
+import { Settings, Save, LogOut } from "lucide-react";
+import { signOut } from "next-auth/react";
 
 export default function OwnerSettingsPage() {
   const [settings, setSettings] = useState<any>(null);
@@ -49,7 +50,7 @@ export default function OwnerSettingsPage() {
         <Settings color="var(--primary)" /> Mağaza Ayarları
       </h1>
 
-      <div className="surface-card">
+      <div className="surface-card" style={{ marginBottom: "2rem" }}>
         <h2 style={{ fontSize: "1.125rem", marginBottom: "1rem" }}>Sadakat Programı Ayarları</h2>
         <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <div className="form-group">
@@ -71,6 +72,17 @@ export default function OwnerSettingsPage() {
             <Save size={20} /> Ayarları Kaydet
           </button>
         </form>
+      </div>
+
+      <div className="surface-card" style={{ borderLeft: "4px solid var(--danger)" }}>
+        <h2 style={{ fontSize: "1.125rem", marginBottom: "1rem", color: "var(--danger)" }}>Hesap İşlemleri</h2>
+        <button 
+          onClick={() => signOut({ callbackUrl: '/' })} 
+          className="btn-secondary" 
+          style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", borderColor: "var(--danger)", color: "var(--danger)" }}
+        >
+          <LogOut size={20} /> Çıkış Yap
+        </button>
       </div>
     </div>
   );
