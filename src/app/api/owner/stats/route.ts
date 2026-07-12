@@ -85,16 +85,51 @@ export async function GET() {
       return `${t.user.name} ${t.user.surname} işlem yaptı (${timeStr})`;
     });
 
-    // --- 7 DAYS CHART & BUSIEST TIMES ---
+    // --- NEW: TODAY STATS ---
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todayTransactions = await prisma.transaction.findMany({
+      where: { 
+        createdAt: { gte: today },
+      },
+      select: { type: true, amount: true, userId: true, createdAt: true }
+    });
+
+    let todayBeans = 0;
+    const uniqueUserIds = new Set<string>();
+
+    // Map for today's hourly data (09:00 to 22:00)
+    const todayHourlyMap: Record<string, number> = {};
+    for(let i=9; i<=22; i++) {
+      todayHourlyMap[`${i.toString().padStart(2, '0')}:00`] = 0;
+    }
+
+    todayTransactions.forEach(t => {
+      if (t.type === "EARN_BEAN") {
+        todayBeans += t.amount;
+      }
+      uniqueUserIds.add(t.userId);
+
+      const hour = t.createdAt.getHours();
+      if(hour >= 9 && hour <= 22) {
+        const hourStr = `${hour.toString().padStart(2, '0')}:00`;
+        todayHourlyMap[hourStr] += 1;
+      }
+    });
+
+    const todayUniqueCustomers = uniqueUserIds.size;
+    const todayHourlyData = Object.keys(todayHourlyMap).map(key => ({
+      hour: key,
+      islem: todayHourlyMap[key]
+    }));
+
+    // --- 7 DAYS CHART & WEEKLY DISTRIBUTION ---
     const sevenDaysAgo = new Date();
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
     sevenDaysAgo.setHours(0, 0, 0, 0);
 
     const allTransactions = await prisma.transaction.findMany({
-      where: { 
-        createdAt: { gte: sevenDaysAgo },
-        type: { in: ["EARN_BEAN", "REDEEM_REWARD"] }
-      },
       select: { type: true, amount: true, createdAt: true }
     });
 
@@ -113,26 +148,46 @@ export async function GET() {
     const hourCounts: Record<string, number> = {};
 
     allTransactions.forEach(t => {
-      // For Chart
-      const dateStr = t.createdAt.toLocaleDateString("tr-TR", { day: "2-digit", month: "short" });
-      if (chartDataMap[dateStr]) {
-        if (t.type === "EARN_BEAN") chartDataMap[dateStr].bean += t.amount;
-        if (t.type === "REDEEM_REWARD") chartDataMap[dateStr].reward += t.amount;
+      // Last 7 days chart
+      if (t.createdAt >= sevenDaysAgo) {
+        const dateStr = t.createdAt.toLocaleDateString("tr-TR", { day: "2-digit", month: "short" });
+        if (chartDataMap[dateStr]) {
+          if (t.type === "EARN_BEAN") chartDataMap[dateStr].bean += t.amount;
+          if (t.type === "REDEEM_REWARD") chartDataMap[dateStr].reward += t.amount;
+        }
       }
 
-      // For Busiest Day
+      // Weekly Day Distribution
       const dayName = t.createdAt.toLocaleDateString("tr-TR", { weekday: "long" });
-      if (dayCounts[dayName] !== undefined) {
-        dayCounts[dayName] += 1;
+      // Map en-US or native names to TR just in case, but formatting with tr-TR should yield TR names.
+      // Standardize the day name manually if needed, but tr-TR should be fine.
+      let normalizedDay = dayName;
+      if(dayName.toLowerCase().includes("monday")) normalizedDay = "Pazartesi";
+      if(dayName.toLowerCase().includes("tuesday")) normalizedDay = "Salı";
+      if(dayName.toLowerCase().includes("wednesday")) normalizedDay = "Çarşamba";
+      if(dayName.toLowerCase().includes("thursday")) normalizedDay = "Perşembe";
+      if(dayName.toLowerCase().includes("friday")) normalizedDay = "Cuma";
+      if(dayName.toLowerCase().includes("saturday")) normalizedDay = "Cumartesi";
+      if(dayName.toLowerCase().includes("sunday")) normalizedDay = "Pazar";
+
+      if (dayCounts[normalizedDay] !== undefined) {
+        dayCounts[normalizedDay] += 1;
       }
 
-      // For Busiest Hour
+      // Busiest Hour (overall)
       const hour = t.createdAt.getHours();
       const hourStr = `${hour.toString().padStart(2, '0')}:00 - ${(hour + 1).toString().padStart(2, '0')}:00`;
       hourCounts[hourStr] = (hourCounts[hourStr] || 0) + 1;
     });
 
     const chartData = Object.values(chartDataMap);
+    
+    // Format Weekly Data for BarChart
+    const daysOrder = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+    const weeklyDayData = daysOrder.map(day => ({
+      day: day.slice(0,3), // Shorten: Paz, Sal, Çar vs.
+      islem: dayCounts[day]
+    }));
 
     // Calculate Busiest Day
     let busiestDay = "Veri Yok";
@@ -164,7 +219,11 @@ export async function GET() {
       recentActivities: activities,
       chartData,
       busiestDay,
-      busiestHour
+      busiestHour,
+      todayBeans,
+      todayUniqueCustomers,
+      todayHourlyData,
+      weeklyDayData
     });
 
   } catch (error) {
