@@ -30,17 +30,11 @@ export default function OwnerDashboard() {
 
   return (
     <div className="container" style={{ paddingTop: "2rem", paddingBottom: "6rem" }}>
-      <div className="dashboard-header" style={{ marginBottom: "2rem" }}>
-        <div>
-          <h1 style={{ color: "var(--text-primary)", fontSize: "1.5rem", fontWeight: "bold" }}>Sistem Analiz Merkezi</h1>
-          <div style={{ color: "var(--text-secondary)", fontSize: "0.875rem" }}>{stats?.storeName} Canlı Verileri</div>
-        </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span style={{ fontWeight: 500 }}>Hoş geldin, {session?.user?.name}</span>
-          <button className="btn-secondary" onClick={() => signOut({ callbackUrl: '/' })} style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", borderColor: "var(--danger)", color: "var(--danger)" }}>
-            Çıkış Yap
-          </button>
-        </div>
+      <div className="dashboard-header" style={{ marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1 style={{ color: "var(--text-primary)", fontSize: "1.5rem", fontWeight: "bold", margin: 0 }}>Admin Paneli</h1>
+        <button className="btn-secondary" onClick={() => signOut({ callbackUrl: '/' })} style={{ padding: "0.5rem 1rem", fontSize: "0.875rem", borderColor: "var(--danger)", color: "var(--danger)" }}>
+          Çıkış Yap
+        </button>
       </div>
 
       {/* 1. BUGÜNÜN ÖZETİ */}
