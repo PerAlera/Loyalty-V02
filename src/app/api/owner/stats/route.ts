@@ -193,8 +193,17 @@ export async function GET() {
     
     // Format Weekly Data for BarChart
     const daysOrder = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
+    const dayLabels: Record<string, string> = {
+      "Pazartesi": "Pzt",
+      "Salı": "Sal",
+      "Çarşamba": "Çar",
+      "Perşembe": "Per",
+      "Cuma": "Cum",
+      "Cumartesi": "Cmt",
+      "Pazar": "Paz"
+    };
     const weeklyDayData = daysOrder.map(day => ({
-      day: day.slice(0,3), // Shorten: Paz, Sal, Çar vs.
+      day: dayLabels[day],
       islem: dayCounts[day]
     }));
 
