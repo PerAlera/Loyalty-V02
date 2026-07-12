@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { signIn } from "next-auth/react";
 import styles from "../login/login.module.css";
 
 export default function RegisterPage() {
@@ -34,8 +35,19 @@ export default function RegisterPage() {
         throw new Error(data.error || "Bir hata oluştu");
       }
 
-      // Başarılı kayıt sonrası logine yönlendir
-      router.push("/login?registered=true");
+      // Başarılı kayıt sonrası otomatik giriş yap
+      const signInRes = await signIn("credentials", {
+        phone: formData.phone,
+        password: formData.password,
+        redirect: false,
+      });
+
+      if (signInRes?.error) {
+        throw new Error(signInRes.error);
+      } else {
+        router.push("/");
+        router.refresh();
+      }
     } catch (err: any) {
       setError(err.message);
       setLoading(false);

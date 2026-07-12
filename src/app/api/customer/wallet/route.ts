@@ -21,7 +21,11 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({ wallet });
+    // Fetch store settings for requiredCoffees
+    const storeSettings = await prisma.storeSettings.findFirst();
+    const requiredCoffees = storeSettings?.requiredCoffees || 10;
+
+    return NextResponse.json({ wallet, requiredCoffees });
   } catch (error) {
     return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }

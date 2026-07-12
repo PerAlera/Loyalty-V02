@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { User, Check, X, Gift } from "lucide-react";
+import { User, Check, X, Gift, Coffee } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Scanner } from "@yudiel/react-qr-scanner";
@@ -14,6 +14,7 @@ export default function CustomerHome() {
   const { data: session } = useSession();
   const router = useRouter();
   const [wallet, setWallet] = useState<{ beans: number, rewards: number } | null>(null);
+  const [requiredCoffees, setRequiredCoffees] = useState(10);
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -24,8 +25,6 @@ export default function CustomerHome() {
 
   // Polling ref
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
-
-  const requiredCoffees = 8; 
 
   useEffect(() => {
     fetchData();
@@ -41,6 +40,7 @@ export default function CustomerHome() {
       if (walletRes.ok) {
         const data = await walletRes.json();
         setWallet(data.wallet);
+        if (data.requiredCoffees) setRequiredCoffees(data.requiredCoffees);
       }
       if (announcementsRes.ok) {
         const data = await announcementsRes.json();
@@ -259,35 +259,43 @@ export default function CustomerHome() {
               transform: "translateY(-50%)"
             }}></div>
 
-            {Array.from({ length: requiredCoffees }).map((_, i) => (
-              <div key={i} style={{ 
-                zIndex: 1, 
-                backgroundColor: "var(--bg-primary)",
-                padding: "2px"
-              }}>
-                {i < progress ? (
-                  <div style={{
-                    width: "16px",
-                    height: "16px",
-                    backgroundColor: "#000",
-                    borderRadius: "50%",
-                    display: "flex",
-                    justifyContent: "center",
-                    alignItems: "center"
-                  }}>
-                    <Check size={10} color="white" strokeWidth={4} />
-                  </div>
-                ) : (
-                  <div style={{
-                    width: "16px",
-                    height: "16px",
-                    backgroundColor: "white",
-                    border: "2px solid #000",
-                    borderRadius: "50%"
-                  }}></div>
-                )}
-              </div>
-            ))}
+            {Array.from({ length: requiredCoffees }).map((_, i) => {
+              const isLast = i === requiredCoffees - 1;
+              return (
+                <div key={i} style={{ 
+                  zIndex: 1, 
+                  backgroundColor: "var(--bg-primary)",
+                  padding: "2px"
+                }}>
+                  {i < progress ? (
+                    <div style={{
+                      width: isLast ? "24px" : "16px",
+                      height: isLast ? "24px" : "16px",
+                      backgroundColor: isLast ? "var(--primary)" : "#000",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}>
+                      {isLast ? <Coffee size={14} color="white" /> : <Check size={10} color="white" strokeWidth={4} />}
+                    </div>
+                  ) : (
+                    <div style={{
+                      width: isLast ? "24px" : "16px",
+                      height: isLast ? "24px" : "16px",
+                      backgroundColor: "white",
+                      border: "2px solid #000",
+                      borderRadius: "50%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center"
+                    }}>
+                      {isLast && <Coffee size={14} color="#000" />}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </div>
 
