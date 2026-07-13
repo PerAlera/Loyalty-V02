@@ -3,7 +3,7 @@ import BottomNav from "@/components/BottomNav";
 
 export default function CashierLayout({ children }: { children: React.ReactNode }) {
   const navItems = [
-    { name: "QR Oluştur", href: "/dashboard/cashier", icon: "plus" as const, isPrimary: true },
+    { name: "QR Oluştur", href: "/dashboard/cashier", icon: "plus" as const },
     { name: "QR Okut", href: "/dashboard/cashier/scan", icon: "scan" as const }
   ];
 
