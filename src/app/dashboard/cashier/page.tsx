@@ -37,12 +37,12 @@ export default function CashierDashboard() {
 
   return (
     <div className="container" style={{ paddingTop: "2rem", paddingBottom: "6rem" }}>
-      <div className="dashboard-header">
-        <h1 style={{ color: "var(--text-primary)" }}>Kasiyer Paneli</h1>
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-          <span>{session?.user?.name} {session?.user?.surname}</span>
-          <button className="btn-secondary" onClick={() => signOut({ callbackUrl: '/' })} style={{ padding: "0.5rem 1rem", fontSize: "0.875rem" }}>
-            Çıkış Yap
+      <div className="dashboard-header" style={{ marginBottom: "2rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <h1 style={{ color: "var(--text-primary)", fontSize: "1.5rem", fontWeight: "bold", margin: 0 }}>Kasiyer Paneli</h1>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <span style={{ fontSize: "0.875rem", color: "var(--text-secondary)" }}>{session?.user?.name}</span>
+          <button onClick={() => signOut({ callbackUrl: '/' })} style={{ padding: "0.25rem 0.5rem", fontSize: "0.75rem", color: "var(--danger)", backgroundColor: "rgba(239, 68, 68, 0.1)", border: "none", borderRadius: "0.5rem", cursor: "pointer", fontWeight: "bold" }}>
+            Çıkış
           </button>
         </div>
       </div>
