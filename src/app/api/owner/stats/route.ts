@@ -39,6 +39,24 @@ export async function GET() {
       where: { type: "EARN_BEAN" }
     });
 
+    // --- RETURNING CUSTOMERS ---
+    // Müşterilerin birden fazla kez puan kazanıp kazanmadığına (EARN_BEAN) bakıyoruz.
+    const returningCustomersData = await prisma.transaction.groupBy({
+      by: ['userId'],
+      where: { type: "EARN_BEAN" },
+      having: {
+        userId: {
+          _count: {
+            gt: 1
+          }
+        }
+      }
+    });
+    const returningCustomersCount = returningCustomersData.length;
+    const returningRate = totalCustomers > 0 
+      ? Math.round((returningCustomersCount / totalCustomers) * 100) 
+      : 0;
+
     // --- DEMOGRAPHICS ---
     const users = await prisma.user.findMany({
       where: { role: "CUSTOMER" },
@@ -233,6 +251,8 @@ export async function GET() {
       totalCustomers,
       totalRewards: totalRewardsData._sum.amount || 0,
       totalBeans: totalBeansData._sum.amount || 0,
+      returningCustomersCount,
+      returningRate,
       demographics,
       recentActivities: activities,
       chartData,

@@ -1,7 +1,7 @@
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
-import { User, HelpCircle, History as HistoryIcon, UserCog, X, Calendar, Edit3, Loader2 } from "lucide-react";
+import { User, HelpCircle, History as HistoryIcon, UserCog, X, Calendar, Edit3, Loader2, ArrowLeft } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -85,6 +85,17 @@ export default function ProfilePage() {
   return (
     <div className="container" style={{ paddingTop: "2rem", paddingBottom: "6rem", position: "relative" }}>
       
+      {/* Geri Dön Butonu */}
+      <div style={{ marginBottom: "1.5rem" }}>
+        <button 
+          onClick={() => router.push("/dashboard/customer")}
+          style={{ background: "none", border: "none", display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-secondary)", cursor: "pointer", fontSize: "1rem", padding: 0 }}
+        >
+          <ArrowLeft size={20} />
+          Ana Ekrana Dön
+        </button>
+      </div>
+
       {/* Profil Başlığı */}
       <div style={{ textAlign: "center", marginBottom: "2rem" }}>
         <div style={{ width: 80, height: 80, borderRadius: 40, backgroundColor: "var(--border-color)", margin: "0 auto 1rem", display: "flex", alignItems: "center", justifyContent: "center" }}>

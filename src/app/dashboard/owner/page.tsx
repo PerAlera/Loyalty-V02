@@ -66,6 +66,13 @@ export default function OwnerDashboard() {
         </div>
 
         <div className="surface-card" style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+          <div style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>Sadık Müşteri (Geri Dönen)</div>
+          <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "var(--success)" }}>
+            %{stats?.returningRate || 0} <span style={{ fontSize: "0.8rem", color: "var(--text-secondary)", fontWeight: "normal" }}>({stats?.returningCustomersCount || 0} Kişi)</span>
+          </div>
+        </div>
+
+        <div className="surface-card" style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
           <div style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>Verilen Ödül</div>
           <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "var(--success)" }}>{stats?.totalRewards || 0}</div>
         </div>
