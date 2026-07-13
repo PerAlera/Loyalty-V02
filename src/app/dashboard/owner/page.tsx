@@ -63,16 +63,23 @@ export default function OwnerDashboard() {
         
         <div className="surface-card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem", borderLeft: "4px solid var(--primary)", backgroundColor: "rgba(101, 67, 33, 0.05)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-secondary)" }}>
-            <Coffee size={20} /> <span style={{ fontSize: "0.875rem" }}>Bugün Dağıtılan Çekirdek</span>
+            <Coffee size={20} /> <span style={{ fontSize: "0.875rem" }}>Dağıtılan Kahve Puanı</span>
           </div>
           <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "var(--primary)" }}>{stats?.todayBeans || 0}</div>
         </div>
 
         <div className="surface-card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem", borderLeft: "4px solid #F59E0B", backgroundColor: "rgba(245, 158, 11, 0.05)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-secondary)" }}>
-            <Users size={20} /> <span style={{ fontSize: "0.875rem" }}>Bugünkü Tekil Müşteri</span>
+            <Gift size={20} /> <span style={{ fontSize: "0.875rem" }}>Dağıtılan Yemek Puanı</span>
           </div>
-          <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#F59E0B" }}>{stats?.todayUniqueCustomers || 0}</div>
+          <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#F59E0B" }}>{stats?.todayFoodPoints || 0}</div>
+        </div>
+
+        <div className="surface-card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem", borderLeft: "4px solid var(--success)", backgroundColor: "rgba(34, 197, 94, 0.05)" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-secondary)" }}>
+            <Users size={20} /> <span style={{ fontSize: "0.875rem" }}>Bugünkü Tekil Ziyaretçi</span>
+          </div>
+          <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "var(--success)" }}>{stats?.todayUniqueCustomers || 0}</div>
         </div>
 
       </div>
@@ -93,14 +100,24 @@ export default function OwnerDashboard() {
           </div>
         </div>
 
-        <div className="surface-card" style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-          <div style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>Verilen Ödül</div>
-          <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "var(--success)" }}>{stats?.totalRewards || 0}</div>
+        <div className="surface-card" style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.25rem", borderLeft: "3px solid var(--primary)" }}>
+          <div style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>Dağıtılan Kahve Puanı</div>
+          <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "var(--primary)" }}>{stats?.totalBeans || 0}</div>
         </div>
 
-        <div className="surface-card" style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
-          <div style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>Dağıtılan Çekirdek</div>
-          <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "var(--primary)" }}>{stats?.totalBeans || 0}</div>
+        <div className="surface-card" style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.25rem", borderLeft: "3px solid var(--primary)" }}>
+          <div style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>Verilen Kahve Ödülü</div>
+          <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "var(--primary)" }}>{stats?.totalRewards || 0}</div>
+        </div>
+
+        <div className="surface-card" style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.25rem", borderLeft: "3px solid #F59E0B" }}>
+          <div style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>Dağıtılan Yemek Puanı</div>
+          <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#F59E0B" }}>{stats?.totalFoodPoints || 0}</div>
+        </div>
+
+        <div className="surface-card" style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.25rem", borderLeft: "3px solid #F59E0B" }}>
+          <div style={{ color: "var(--text-secondary)", fontSize: "0.8rem" }}>Verilen Yemek Ödülü</div>
+          <div style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#F59E0B" }}>{stats?.totalFoodRewards || 0}</div>
         </div>
 
         <div className="surface-card" style={{ padding: "1.25rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
@@ -130,7 +147,7 @@ export default function OwnerDashboard() {
                 <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                 <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                 <RechartsTooltip />
-                <Line type="monotone" name="İşlem" dataKey="islem" stroke="#F59E0B" strokeWidth={3} activeDot={{ r: 8 }} />
+                <Line type="monotone" name="Tekil Ziyaretçi" dataKey="islem" stroke="#10B981" strokeWidth={3} activeDot={{ r: 8 }} />
               </LineChart>
             </ResponsiveContainer>
           ) : (
@@ -148,7 +165,7 @@ export default function OwnerDashboard() {
           
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
             <h2 style={{ fontSize: "1.25rem", margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <BarChart2 size={24} color="var(--primary)"/> Haftalık Yoğunluk
+              <BarChart2 size={24} color="var(--primary)"/> Haftalık Ziyaretçi Yoğunluğu
             </h2>
 
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", backgroundColor: "var(--bg-primary)", padding: "0.25rem 0.5rem", borderRadius: "2rem", border: "1px solid var(--border-color)" }}>
@@ -179,7 +196,7 @@ export default function OwnerDashboard() {
                   <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                   <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                   <RechartsTooltip cursor={{fill: 'rgba(101, 67, 33, 0.1)'}} />
-                  <Bar dataKey="islem" name="İşlem Sayısı" fill="var(--primary)" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="islem" name="Ziyaretçi Sayısı" fill="var(--primary)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -193,7 +210,7 @@ export default function OwnerDashboard() {
         {/* Son 7 Günlük Aktivite (Çizgi Grafik) */}
         <div className="surface-card" style={{ padding: "1.5rem" }}>
           <h2 style={{ fontSize: "1.25rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <TrendingUp size={24} color="var(--success)"/> Son 7 Günlük Performans
+            <TrendingUp size={24} color="var(--success)"/> Son 7 Günlük Dağılım Performansı
           </h2>
           <div style={{ width: '100%', height: 250 }}>
             {stats?.chartData && stats.chartData.length > 0 ? (
@@ -204,8 +221,10 @@ export default function OwnerDashboard() {
                   <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                   <RechartsTooltip />
                   <Legend />
-                  <Line type="monotone" name="Puan" dataKey="bean" stroke="var(--primary)" strokeWidth={2} />
-                  <Line type="monotone" name="Ödül" dataKey="reward" stroke="var(--success)" strokeWidth={2} />
+                  <Line type="monotone" name="Kahve Puanı" dataKey="bean" stroke="var(--primary)" strokeWidth={2} />
+                  <Line type="monotone" name="Kahve Ödülü" dataKey="reward" stroke="var(--primary)" strokeDasharray="5 5" strokeWidth={2} />
+                  <Line type="monotone" name="Yemek Puanı" dataKey="foodPoints" stroke="#F59E0B" strokeWidth={2} />
+                  <Line type="monotone" name="Yemek Ödülü" dataKey="foodRewards" stroke="#F59E0B" strokeDasharray="5 5" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (

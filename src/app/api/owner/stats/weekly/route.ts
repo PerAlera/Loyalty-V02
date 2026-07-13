@@ -47,19 +47,25 @@ export async function GET(request: Request) {
           lte: endUTC
         }
       },
-      select: { createdAt: true }
+      select: { createdAt: true, userId: true }
     });
 
-    const dayCounts: Record<string, number> = {
-      "Pazartesi": 0, "Salı": 0, "Çarşamba": 0, "Perşembe": 0, "Cuma": 0, "Cumartesi": 0, "Pazar": 0
+    const dayUserMap: Record<string, Set<string>> = {
+      "Pazartesi": new Set(), "Salı": new Set(), "Çarşamba": new Set(), 
+      "Perşembe": new Set(), "Cuma": new Set(), "Cumartesi": new Set(), "Pazar": new Set()
     };
     const trDays = ["Pazar", "Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi"];
 
     transactions.forEach(t => {
       const trDate = getTRDate(t.createdAt);
       const dayName = trDays[trDate.getUTCDay()];
-      dayCounts[dayName] += 1;
+      dayUserMap[dayName].add(t.userId);
     });
+
+    const dayCounts: Record<string, number> = {};
+    for (const day in dayUserMap) {
+      dayCounts[day] = dayUserMap[day].size;
+    }
 
     const daysOrder = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
     const dayLabels: Record<string, string> = {

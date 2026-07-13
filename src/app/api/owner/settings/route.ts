@@ -35,9 +35,9 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { requiredCoffees } = body;
+    const { requiredCoffees, requiredFoods } = body;
 
-    if (!requiredCoffees || requiredCoffees < 1) {
+    if (!requiredCoffees || requiredCoffees < 1 || !requiredFoods || requiredFoods < 1) {
       return NextResponse.json({ error: "Geçersiz değer" }, { status: 400 });
     }
 
@@ -46,7 +46,10 @@ export async function PUT(req: Request) {
 
     const updatedSettings = await prisma.storeSettings.update({
       where: { storeId: store.id },
-      data: { requiredCoffees: parseInt(requiredCoffees) }
+      data: { 
+        requiredCoffees: parseInt(requiredCoffees),
+        requiredFoods: parseInt(requiredFoods)
+      }
     });
 
     return NextResponse.json({ success: true, settings: updatedSettings });

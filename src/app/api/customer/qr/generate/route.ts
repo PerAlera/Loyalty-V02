@@ -11,11 +11,22 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Yetkisiz erişim" }, { status: 403 });
     }
 
+    const body = await req.json();
+    const productType = body.productType === "FOOD" ? "FOOD" : "COFFEE";
+
     const wallet = await prisma.wallet.findUnique({
       where: { userId: session.user.id }
     });
 
-    if (!wallet || wallet.rewards < 1) {
+    if (!wallet) {
+      return NextResponse.json({ error: "Cüzdan bulunamadı" }, { status: 404 });
+    }
+
+    if (productType === "FOOD" && wallet.foodRewards < 1) {
+      return NextResponse.json({ error: "Ücretsiz yemek hakkınız bulunmamaktadır." }, { status: 400 });
+    }
+
+    if (productType === "COFFEE" && wallet.rewards < 1) {
       return NextResponse.json({ error: "Ücretsiz kahve hakkınız bulunmamaktadır." }, { status: 400 });
     }
 
@@ -28,6 +39,7 @@ export async function POST(req: Request) {
       data: {
         token: tokenString,
         type: "REDEEM",
+        productType,
         userId: session.user.id,
         expiresAt
       }

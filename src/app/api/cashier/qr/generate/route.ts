@@ -12,11 +12,13 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { beans } = body;
+    const { beans, productType } = body;
 
     if (!beans || beans < 1) {
-      return NextResponse.json({ error: "Geçersiz kahve adedi" }, { status: 400 });
+      return NextResponse.json({ error: "Geçersiz adet" }, { status: 400 });
     }
+
+    const type = productType === "FOOD" ? "FOOD" : "COFFEE";
 
     // Rastgele benzersiz bir token string oluştur
     const tokenString = crypto.randomUUID();
@@ -27,6 +29,7 @@ export async function POST(req: Request) {
       data: {
         token: tokenString,
         type: "EARN",
+        productType: type,
         beans: parseInt(beans),
         expiresAt
       }

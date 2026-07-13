@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 
 export default function OwnerSettingsPage() {
   const [settings, setSettings] = useState<any>(null);
-  const [newSettings, setNewSettings] = useState({ requiredCoffees: 10 });
+  const [newSettings, setNewSettings] = useState({ requiredCoffees: 10, requiredFoods: 10 });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -19,7 +19,10 @@ export default function OwnerSettingsPage() {
       if (res.ok) {
         const data = await res.json();
         setSettings(data.settings);
-        setNewSettings({ requiredCoffees: data.settings.requiredCoffees });
+        setNewSettings({ 
+          requiredCoffees: data.settings.requiredCoffees,
+          requiredFoods: data.settings.requiredFoods || 10
+        });
       }
     } catch (e) {
       console.error(e);
@@ -53,6 +56,7 @@ export default function OwnerSettingsPage() {
       <div className="surface-card" style={{ marginBottom: "2rem" }}>
         <h2 style={{ fontSize: "1.125rem", marginBottom: "1rem" }}>Sadakat Programı Ayarları</h2>
         <form onSubmit={handleSaveSettings} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          
           <div className="form-group">
             <label className="form-label">Ücretsiz Kahve İçin Gereken Çekirdek Sayısı</label>
             <input 
@@ -61,11 +65,27 @@ export default function OwnerSettingsPage() {
               max="50"
               className="form-input" 
               value={newSettings.requiredCoffees} 
-              onChange={e => setNewSettings({ requiredCoffees: parseInt(e.target.value) })}
+              onChange={e => setNewSettings({ ...newSettings, requiredCoffees: parseInt(e.target.value) })}
               required 
             />
             <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginTop: "0.5rem" }}>
-              Müşteriler, belirlediğiniz adette çekirdek topladığında 1 adet ücretsiz ödül kazanır. (Mevcut: {settings?.requiredCoffees})
+              Müşteriler, belirlediğiniz adette çekirdek topladığında 1 adet ücretsiz kahve kazanır. (Mevcut: {settings?.requiredCoffees})
+            </p>
+          </div>
+
+          <div className="form-group">
+            <label className="form-label">Ücretsiz Yemek İçin Gereken Puan Sayısı</label>
+            <input 
+              type="number" 
+              min="1" 
+              max="50"
+              className="form-input" 
+              value={newSettings.requiredFoods} 
+              onChange={e => setNewSettings({ ...newSettings, requiredFoods: parseInt(e.target.value) })}
+              required 
+            />
+            <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginTop: "0.5rem" }}>
+              Müşteriler, belirlediğiniz adette yemek puanı topladığında 1 adet ücretsiz yemek ödülü kazanır. (Mevcut: {settings?.requiredFoods || 10})
             </p>
           </div>
           <button type="submit" className="btn-primary" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem" }}>

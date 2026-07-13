@@ -9,6 +9,7 @@ export default function CashierDashboard() {
   
   const [token, setToken] = useState<string | null>(null);
   const [beans, setBeans] = useState<number>(1);
+  const [productType, setProductType] = useState<"COFFEE" | "FOOD">("COFFEE");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string, type: "success" | "error" } | null>(null);
 
@@ -20,7 +21,7 @@ export default function CashierDashboard() {
       const res = await fetch("/api/cashier/qr/generate", { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ beans })
+        body: JSON.stringify({ beans, productType })
       });
       const data = await res.json();
       
@@ -55,27 +56,54 @@ export default function CashierDashboard() {
 
       <div className="surface-card" style={{ textAlign: "center", maxWidth: "500px", margin: "0 auto" }}>
         <h2 style={{ marginBottom: "1rem" }}>Müşteriye Puan Ver</h2>
-        <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>Müşteriye vermek istediğiniz kahve (puan) adedini girin ve QR oluşturun.</p>
+        <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>Müşteriye vermek istediğiniz puan türünü ve adedini seçin.</p>
 
         {token ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem" }}>
-            <div style={{ padding: "1rem", background: "white", borderRadius: "1rem", border: "1px solid var(--border-color)" }}>
+            <div style={{ padding: "1rem", background: "white", borderRadius: "1rem", border: "1px solid var(--border-color)", position: "relative" }}>
               <QRCodeSVG value={token} size={250} />
+              <div style={{ position: "absolute", top: -15, right: -15, background: productType === "COFFEE" ? "var(--primary)" : "#F59E0B", color: "white", padding: "0.5rem", borderRadius: "50%", fontWeight: "bold", fontSize: "1.2rem", width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {beans}
+              </div>
             </div>
+            <p style={{ color: "var(--text-secondary)", fontWeight: "bold", fontSize: "1.1rem" }}>
+              {productType === "COFFEE" ? "Kahve Puanı" : "Yemek Puanı"}
+            </p>
             <p style={{ color: "var(--text-secondary)" }}>Lütfen müşterinin bu kodu okutmasını bekleyin.</p>
             <button className="btn-secondary" onClick={() => setToken(null)} style={{ width: "100%" }}>Yeni Kod Oluştur</button>
           </div>
         ) : (
-          <form onSubmit={generateToken} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            <input 
-              type="number" 
-              min="1" 
-              className="form-input" 
-              value={beans} 
-              onChange={e => setBeans(parseInt(e.target.value))} 
-              required 
-            />
-            <button type="submit" className="btn-primary" disabled={loading} style={{ padding: "1rem", fontSize: "1.125rem" }}>
+          <form onSubmit={generateToken} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+            
+            <div style={{ display: "flex", background: "var(--bg-primary)", borderRadius: "0.5rem", overflow: "hidden", border: "1px solid var(--border-color)" }}>
+              <button
+                type="button"
+                onClick={() => setProductType("COFFEE")}
+                style={{ flex: 1, padding: "0.75rem", border: "none", cursor: "pointer", fontWeight: "bold", background: productType === "COFFEE" ? "var(--primary)" : "transparent", color: productType === "COFFEE" ? "white" : "var(--text-secondary)", transition: "all 0.2s" }}
+              >
+                ☕ Kahve
+              </button>
+              <button
+                type="button"
+                onClick={() => setProductType("FOOD")}
+                style={{ flex: 1, padding: "0.75rem", border: "none", cursor: "pointer", fontWeight: "bold", background: productType === "FOOD" ? "#F59E0B" : "transparent", color: productType === "FOOD" ? "white" : "var(--text-secondary)", transition: "all 0.2s" }}
+              >
+                🍔 Yemek
+              </button>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", textAlign: "left" }}>
+              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "0.875rem" }}>Puan Adedi</label>
+              <input 
+                type="number" 
+                min="1" 
+                className="form-input" 
+                value={beans} 
+                onChange={e => setBeans(parseInt(e.target.value))} 
+                required 
+              />
+            </div>
+            <button type="submit" className="btn-primary" disabled={loading} style={{ padding: "1rem", fontSize: "1.125rem", background: productType === "COFFEE" ? "var(--primary)" : "#F59E0B" }}>
               {loading ? "Oluşturuluyor..." : "QR Kod Oluştur"}
             </button>
           </form>

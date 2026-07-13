@@ -30,7 +30,13 @@ export async function POST(req: Request) {
 
     const wallet = qrToken.user.wallets[0];
 
-    if (wallet.rewards < 1) {
+    const isFood = qrToken.productType === "FOOD";
+
+    if (isFood && wallet.foodRewards < 1) {
+      return NextResponse.json({ error: "Müşterinin yeterli ücretsiz yemek hakkı yok!" }, { status: 400 });
+    }
+    
+    if (!isFood && wallet.rewards < 1) {
       return NextResponse.json({ error: "Müşterinin yeterli ücretsiz kahve hakkı yok!" }, { status: 400 });
     }
 
@@ -44,19 +50,21 @@ export async function POST(req: Request) {
       // Ödülü düş
       prisma.wallet.update({
         where: { id: wallet.id },
-        data: { rewards: wallet.rewards - 1 }
+        data: isFood ? { foodRewards: wallet.foodRewards - 1 } : { rewards: wallet.rewards - 1 }
       }),
       // İşlem geçmişine ekle
       prisma.transaction.create({
         data: {
           userId: qrToken.userId,
-          type: "REDEEM_REWARD",
+          type: isFood ? "REDEEM_FOOD" : "REDEEM_REWARD",
           amount: 1
         }
       })
     ]);
 
-    return NextResponse.json({ success: true, message: "Ödül başarıyla onaylandı ve müşteriden 1 adet ücretsiz kahve düşüldü." });
+    const rewardName = isFood ? "yemek" : "kahve";
+
+    return NextResponse.json({ success: true, message: `Ödül başarıyla onaylandı ve müşteriden 1 adet ücretsiz ${rewardName} düşüldü.` });
   } catch (error) {
     return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }

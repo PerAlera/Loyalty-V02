@@ -13,8 +13,9 @@ type ModalType = "NONE" | "SCAN" | "REDEEM" | "CAMPAIGNS" | "SUCCESS";
 export default function CustomerHome() {
   const { data: session } = useSession();
   const router = useRouter();
-  const [wallet, setWallet] = useState<{ beans: number, rewards: number } | null>(null);
+  const [wallet, setWallet] = useState<{ beans: number, rewards: number, foodPoints: number, foodRewards: number } | null>(null);
   const [requiredCoffees, setRequiredCoffees] = useState(10);
+  const [requiredFoods, setRequiredFoods] = useState(10);
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   
@@ -22,6 +23,7 @@ export default function CustomerHome() {
   const [modalType, setModalType] = useState<ModalType>("NONE");
   const [successMessage, setSuccessMessage] = useState("");
   const [redeemToken, setRedeemToken] = useState<string | null>(null);
+  const [redeemType, setRedeemType] = useState<"COFFEE" | "FOOD" | null>(null);
 
   // Polling ref
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
@@ -41,6 +43,7 @@ export default function CustomerHome() {
         const data = await walletRes.json();
         setWallet(data.wallet);
         if (data.requiredCoffees) setRequiredCoffees(data.requiredCoffees);
+        if (data.requiredFoods) setRequiredFoods(data.requiredFoods);
       }
       if (announcementsRes.ok) {
         const data = await announcementsRes.json();
@@ -57,6 +60,7 @@ export default function CustomerHome() {
   const closeModal = () => {
     setModalType("NONE");
     setRedeemToken(null);
+    setRedeemType(null);
     if (pollInterval.current) {
       clearInterval(pollInterval.current);
       pollInterval.current = null;
@@ -82,8 +86,13 @@ export default function CustomerHome() {
       });
       const data = await res.json();
       if (res.ok) {
-        setWallet({ beans: data.newBeans, rewards: data.newRewards });
-        showSuccess("Puan Başarıyla Eklendi!");
+        setWallet({ 
+          beans: data.newBeans, 
+          rewards: data.newRewards,
+          foodPoints: data.newFoodPoints,
+          foodRewards: data.newFoodRewards
+        });
+        showSuccess(data.message || "Puan Başarıyla Eklendi!");
       } else {
         alert(data.error || "Hata oluştu.");
       }
@@ -93,16 +102,22 @@ export default function CustomerHome() {
   };
 
   // --- REDEEM (Ödül Kullan) Logic ---
-  const handleOpenRedeem = async () => {
-    if (!wallet?.rewards || wallet.rewards < 1) return;
+  const handleOpenRedeem = async (type: "COFFEE" | "FOOD") => {
+    if (type === "COFFEE" && (!wallet?.rewards || wallet.rewards < 1)) return;
+    if (type === "FOOD" && (!wallet?.foodRewards || wallet.foodRewards < 1)) return;
     
     try {
-      const res = await fetch("/api/customer/qr/generate", { method: "POST" });
+      const res = await fetch("/api/customer/qr/generate", { 
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productType: type })
+      });
       const data = await res.json();
       if (res.ok) {
         setRedeemToken(data.token);
+        setRedeemType(type);
         openModal("REDEEM");
-        startPollingForRedeem();
+        startPollingForRedeem(type);
       } else {
         alert(data.error);
       }
@@ -111,7 +126,7 @@ export default function CustomerHome() {
     }
   };
 
-  const startPollingForRedeem = () => {
+  const startPollingForRedeem = (type: "COFFEE" | "FOOD") => {
     if (pollInterval.current) clearInterval(pollInterval.current);
     
     pollInterval.current = setInterval(async () => {
@@ -120,9 +135,14 @@ export default function CustomerHome() {
         if (res.ok) {
           const data = await res.json();
           setWallet((prev) => {
-            if (prev && data.wallet.rewards < prev.rewards) {
-              if (pollInterval.current) clearInterval(pollInterval.current);
-              showSuccess("Ödülünüz Başarıyla Kullanıldı! Afiyet Olsun ☕");
+            if (prev) {
+              const currentReward = type === "COFFEE" ? data.wallet.rewards : data.wallet.foodRewards;
+              const prevReward = type === "COFFEE" ? prev.rewards : prev.foodRewards;
+              
+              if (currentReward < prevReward) {
+                if (pollInterval.current) clearInterval(pollInterval.current);
+                showSuccess("Ödülünüz Başarıyla Kullanıldı! Afiyet Olsun 🎉");
+              }
             }
             return data.wallet;
           });
@@ -134,8 +154,12 @@ export default function CustomerHome() {
   if (loading) return <div style={{ padding: "3rem", textAlign: "center" }}>Yükleniyor...</div>;
 
   const currentBeans = wallet?.beans || 0;
-  const progress = Math.min(currentBeans, requiredCoffees);
-  const hasReward = wallet?.rewards !== undefined && wallet.rewards > 0;
+  const progressCoffee = Math.min(currentBeans, requiredCoffees);
+  const hasRewardCoffee = wallet?.rewards !== undefined && wallet.rewards > 0;
+
+  const currentFood = wallet?.foodPoints || 0;
+  const progressFood = Math.min(currentFood, requiredFoods);
+  const hasRewardFood = wallet?.foodRewards !== undefined && wallet.foodRewards > 0;
 
   return (
     <div style={{ 
@@ -240,63 +264,135 @@ export default function CustomerHome() {
           </div>
         </div>
 
-        {/* İLERLEME ÇUBUĞU (Her zaman görünür) */}
-        <div style={{ width: "100%", maxWidth: "320px", padding: "0 1rem", marginBottom: "2rem" }}>
-          <div style={{ 
-            display: "flex", 
-            justifyContent: "space-between", 
-            position: "relative",
-            alignItems: "center"
-          }}>
-            <div style={{
-              position: "absolute",
-              top: "50%",
-              left: "0",
-              right: "0",
-              height: "2px",
-              backgroundColor: "#000",
-              zIndex: 0,
-              transform: "translateY(-50%)"
-            }}></div>
+        {/* İLERLEME ÇUBUKLARI */}
+        <div style={{ width: "100%", maxWidth: "320px", padding: "0 1rem", marginBottom: "2rem", display: "flex", flexDirection: "column", gap: "2rem" }}>
+          
+          {/* Kahve İlerlemesi */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+              <span style={{ fontSize: "0.875rem", fontWeight: "bold", color: "var(--text-secondary)" }}>Kahve Çekirdekleri</span>
+              <span style={{ fontSize: "0.875rem", color: "var(--primary)" }}>{currentBeans} / {requiredCoffees}</span>
+            </div>
+            <div style={{ 
+              display: "flex", 
+              justifyContent: "space-between", 
+              position: "relative",
+              alignItems: "center"
+            }}>
+              <div style={{
+                position: "absolute",
+                top: "50%",
+                left: "0",
+                right: "0",
+                height: "2px",
+                backgroundColor: "#000",
+                zIndex: 0,
+                transform: "translateY(-50%)"
+              }}></div>
 
-            {Array.from({ length: requiredCoffees }).map((_, i) => {
-              const isLast = i === requiredCoffees - 1;
-              return (
-                <div key={i} style={{ 
-                  zIndex: 1, 
-                  backgroundColor: "var(--bg-primary)",
-                  padding: "2px"
-                }}>
-                  {i < progress ? (
-                    <div style={{
-                      width: isLast ? "24px" : "16px",
-                      height: isLast ? "24px" : "16px",
-                      backgroundColor: isLast ? "var(--primary)" : "#000",
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center"
-                    }}>
-                      {isLast ? <Coffee size={14} color="white" /> : <Check size={10} color="white" strokeWidth={4} />}
-                    </div>
-                  ) : (
-                    <div style={{
-                      width: isLast ? "24px" : "16px",
-                      height: isLast ? "24px" : "16px",
-                      backgroundColor: "white",
-                      border: "2px solid #000",
-                      borderRadius: "50%",
-                      display: "flex",
-                      justifyContent: "center",
-                      alignItems: "center"
-                    }}>
-                      {isLast && <Coffee size={14} color="#000" />}
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+              {Array.from({ length: requiredCoffees }).map((_, i) => {
+                const isLast = i === requiredCoffees - 1;
+                return (
+                  <div key={i} style={{ 
+                    zIndex: 1, 
+                    backgroundColor: "var(--bg-primary)",
+                    padding: "2px"
+                  }}>
+                    {i < progressCoffee ? (
+                      <div style={{
+                        width: isLast ? "24px" : "16px",
+                        height: isLast ? "24px" : "16px",
+                        backgroundColor: isLast ? "var(--primary)" : "#000",
+                        borderRadius: "50%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                      }}>
+                        {isLast ? <Coffee size={14} color="white" /> : <Check size={10} color="white" strokeWidth={4} />}
+                      </div>
+                    ) : (
+                      <div style={{
+                        width: isLast ? "24px" : "16px",
+                        height: isLast ? "24px" : "16px",
+                        backgroundColor: "white",
+                        border: "2px solid #000",
+                        borderRadius: "50%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                      }}>
+                        {isLast && <Coffee size={14} color="#000" />}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
           </div>
+
+          {/* Yemek İlerlemesi */}
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+              <span style={{ fontSize: "0.875rem", fontWeight: "bold", color: "var(--text-secondary)" }}>Yemek Puanları</span>
+              <span style={{ fontSize: "0.875rem", color: "#F59E0B" }}>{currentFood} / {requiredFoods}</span>
+            </div>
+            <div style={{ 
+              display: "flex", 
+              justifyContent: "space-between", 
+              position: "relative",
+              alignItems: "center"
+            }}>
+              <div style={{
+                position: "absolute",
+                top: "50%",
+                left: "0",
+                right: "0",
+                height: "2px",
+                backgroundColor: "#000",
+                zIndex: 0,
+                transform: "translateY(-50%)"
+              }}></div>
+
+              {Array.from({ length: requiredFoods }).map((_, i) => {
+                const isLast = i === requiredFoods - 1;
+                return (
+                  <div key={i} style={{ 
+                    zIndex: 1, 
+                    backgroundColor: "var(--bg-primary)",
+                    padding: "2px"
+                  }}>
+                    {i < progressFood ? (
+                      <div style={{
+                        width: isLast ? "24px" : "16px",
+                        height: isLast ? "24px" : "16px",
+                        backgroundColor: isLast ? "#F59E0B" : "#000",
+                        borderRadius: "50%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                      }}>
+                        {isLast ? <Gift size={14} color="white" /> : <Check size={10} color="white" strokeWidth={4} />}
+                      </div>
+                    ) : (
+                      <div style={{
+                        width: isLast ? "24px" : "16px",
+                        height: isLast ? "24px" : "16px",
+                        backgroundColor: "white",
+                        border: "2px solid #000",
+                        borderRadius: "50%",
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center"
+                      }}>
+                        {isLast && <Gift size={14} color="#000" />}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
         </div>
 
         {/* Butonlar */}
@@ -316,14 +412,15 @@ export default function CustomerHome() {
           </button>
 
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+            
+            {/* Kahve Ödül Butonu */}
             <div style={{ position: "relative", width: "100%" }}>
-              {/* ÖDÜL ADEDİ İBARESİ (Sadece ödül varsa) */}
-              {hasReward && (
+              {hasRewardCoffee && (
                 <div style={{
                   position: "absolute",
                   top: "-10px",
                   left: "-10px",
-                  backgroundColor: "#EF4444", // Kırmızı bildirim rengi
+                  backgroundColor: "#EF4444", 
                   color: "white",
                   width: "28px",
                   height: "28px",
@@ -340,31 +437,75 @@ export default function CustomerHome() {
                   {wallet.rewards}
                 </div>
               )}
-              
               <button 
                 className="btn-secondary" 
-                onClick={handleOpenRedeem}
+                onClick={() => handleOpenRedeem("COFFEE")}
                 style={{ 
                   width: "100%",
                   fontSize: "0.875rem", 
                   padding: "0.875rem 0",
-                  opacity: hasReward ? 1 : 0.5,
-                  cursor: hasReward ? "pointer" : "not-allowed",
+                  opacity: hasRewardCoffee ? 1 : 0.5,
+                  cursor: hasRewardCoffee ? "pointer" : "not-allowed",
+                  borderColor: "var(--primary)",
+                  color: "var(--primary)"
                 }}
-                disabled={!hasReward}
+                disabled={!hasRewardCoffee}
               >
-                Ödül Kullan
+                ☕ Kahve Ödülü
               </button>
             </div>
             
-            <button 
-              className="btn-secondary" 
-              onClick={() => openModal("CAMPAIGNS")}
-              style={{ fontSize: "0.875rem", padding: "0.875rem 0" }}
-            >
-              Kampanyalar
-            </button>
+            {/* Yemek Ödül Butonu */}
+            <div style={{ position: "relative", width: "100%" }}>
+              {hasRewardFood && (
+                <div style={{
+                  position: "absolute",
+                  top: "-10px",
+                  left: "-10px",
+                  backgroundColor: "#EF4444", 
+                  color: "white",
+                  width: "28px",
+                  height: "28px",
+                  borderRadius: "50%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontWeight: "bold",
+                  fontSize: "0.8rem",
+                  zIndex: 10,
+                  boxShadow: "0 2px 5px rgba(0,0,0,0.2)",
+                  animation: "bounce 2s infinite"
+                }}>
+                  {wallet.foodRewards}
+                </div>
+              )}
+              <button 
+                className="btn-secondary" 
+                onClick={() => handleOpenRedeem("FOOD")}
+                style={{ 
+                  width: "100%",
+                  fontSize: "0.875rem", 
+                  padding: "0.875rem 0",
+                  opacity: hasRewardFood ? 1 : 0.5,
+                  cursor: hasRewardFood ? "pointer" : "not-allowed",
+                  borderColor: "#F59E0B",
+                  color: "#F59E0B"
+                }}
+                disabled={!hasRewardFood}
+              >
+                🍔 Yemek Ödülü
+              </button>
+            </div>
+            
           </div>
+          
+          <button 
+            className="btn-secondary" 
+            onClick={() => openModal("CAMPAIGNS")}
+            style={{ fontSize: "0.875rem", padding: "0.875rem 0", width: "100%" }}
+          >
+            Kampanyalar
+          </button>
           
         </div>
       </div>

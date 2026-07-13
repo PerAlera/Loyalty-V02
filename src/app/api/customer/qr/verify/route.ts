@@ -25,19 +25,31 @@ export async function POST(req: Request) {
 
     const settings = await prisma.storeSettings.findFirst();
     const requiredCoffees = settings ? settings.requiredCoffees : 10;
+    const requiredFoods = settings ? settings.requiredFoods : 10;
 
     let wallet = await prisma.wallet.findUnique({ where: { userId: session.user.id } });
     if (!wallet) {
-      wallet = await prisma.wallet.create({ data: { userId: session.user.id, beans: 0, rewards: 0 } });
+      wallet = await prisma.wallet.create({ data: { userId: session.user.id, beans: 0, rewards: 0, foodPoints: 0, foodRewards: 0 } });
     }
 
     const beansEarned = qrToken.beans || 1;
-    let newBeans = wallet.beans + beansEarned;
+    let newBeans = wallet.beans;
     let newRewards = wallet.rewards;
+    let newFoodPoints = wallet.foodPoints;
+    let newFoodRewards = wallet.foodRewards;
 
-    while (newBeans >= requiredCoffees) {
-      newBeans -= requiredCoffees;
-      newRewards += 1;
+    if (qrToken.productType === "FOOD") {
+      newFoodPoints += beansEarned;
+      while (newFoodPoints >= requiredFoods) {
+        newFoodPoints -= requiredFoods;
+        newFoodRewards += 1;
+      }
+    } else {
+      newBeans += beansEarned;
+      while (newBeans >= requiredCoffees) {
+        newBeans -= requiredCoffees;
+        newRewards += 1;
+      }
     }
 
     await prisma.$transaction([
@@ -47,22 +59,31 @@ export async function POST(req: Request) {
       }),
       prisma.wallet.update({
         where: { id: wallet.id },
-        data: { beans: newBeans, rewards: newRewards }
+        data: { 
+          beans: newBeans, 
+          rewards: newRewards,
+          foodPoints: newFoodPoints,
+          foodRewards: newFoodRewards
+        }
       }),
       prisma.transaction.create({
         data: {
           userId: session.user.id,
-          type: "EARN_BEAN", // Her zaman kazanım olarak kaydet
+          type: qrToken.productType === "FOOD" ? "EARN_FOOD" : "EARN_BEAN",
           amount: beansEarned
         }
       })
     ]);
 
+    const pointName = qrToken.productType === "FOOD" ? "yemek puanı" : "kahve çekirdeği";
+
     return NextResponse.json({ 
       success: true, 
-      message: `${beansEarned} çekirdek başarıyla eklendi!`,
+      message: `${beansEarned} ${pointName} başarıyla eklendi!`,
       newBeans,
-      newRewards
+      newRewards,
+      newFoodPoints,
+      newFoodRewards
     });
   } catch (error) {
     return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });

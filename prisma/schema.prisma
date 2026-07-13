@@ -59,18 +59,21 @@ model StoreSettings {
   storeId         String   @unique
   store           Store    @relation(fields: [storeId], references: [id])
   requiredCoffees Int      @default(10)
+  requiredFoods   Int      @default(10)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
 
 model Wallet {
-  id        String   @id @default(cuid())
-  userId    String   @unique
-  user      User     @relation(fields: [userId], references: [id])
-  beans     Int      @default(0) // Çekirdek (Puan) sayısı
-  rewards   Int      @default(0) // Kazanılan ücretsiz kahve sayısı
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  beans       Int      @default(0) // Çekirdek (Puan) sayısı (Kahve)
+  rewards     Int      @default(0) // Kazanılan ücretsiz kahve sayısı
+  foodPoints  Int      @default(0) // Yemek puanı sayısı
+  foodRewards Int      @default(0) // Kazanılan ücretsiz yemek sayısı
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
 
 model Transaction {
@@ -78,29 +81,38 @@ model Transaction {
   userId    String
   user      User             @relation("UserTransactions", fields: [userId], references: [id])
   type      TransactionType
-  amount    Int              // Kazanılan/Harcanan miktar (Çekirdek veya Ödül)
+  amount    Int              // Kazanılan/Harcanan miktar
   createdAt DateTime         @default(now())
 }
 
 enum TransactionType {
-  EARN_BEAN       // Çekirdek kazanma
-  SPEND_BEAN      // 10 çekirdeğin sıfırlanıp ödüle dönüşmesi
-  REDEEM_REWARD   // Ödül (ücretsiz kahve) kullanımı
+  EARN_BEAN       // Çekirdek (Kahve) kazanma
+  SPEND_BEAN      // Kahve çekirdeğinin sıfırlanıp ödüle dönüşmesi
+  REDEEM_REWARD   // Kahve ödülü kullanımı
+  EARN_FOOD       // Yemek puanı kazanma
+  SPEND_FOOD      // Yemek puanının sıfırlanıp ödüle dönüşmesi
+  REDEEM_FOOD     // Yemek ödülü kullanımı
 }
 
 model QrToken {
-  id        String   @id @default(cuid())
-  token     String   @unique
-  userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
-  type      QrType
-  beans     Int?     // Eğer puan kazanma QR'ı ise adet
-  expiresAt DateTime
-  isUsed    Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id          String       @id @default(cuid())
+  token       String       @unique
+  userId      String?
+  user        User?        @relation(fields: [userId], references: [id])
+  type        QrType
+  productType ProductType  @default(COFFEE)
+  beans       Int?         // Kazanılacak puan adedi (Kahve veya Yemek)
+  expiresAt   DateTime
+  isUsed      Boolean      @default(false)
+  createdAt   DateTime     @default(now())
 }
 
 enum QrType {
   EARN      // Kasiyerin oluşturduğu, müşterinin okuttuğu (Puan Kazanma)
   REDEEM    // Müşterinin oluşturduğu, kasiyerin okuttuğu (Ödül Kullanma)
+}
+
+enum ProductType {
+  COFFEE
+  FOOD
 }
