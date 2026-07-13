@@ -208,22 +208,6 @@ export async function GET() {
     });
 
     const chartData = Object.values(chartDataMap);
-    
-    // Format Weekly Data for BarChart
-    const daysOrder = ["Pazartesi", "Salı", "Çarşamba", "Perşembe", "Cuma", "Cumartesi", "Pazar"];
-    const dayLabels: Record<string, string> = {
-      "Pazartesi": "Pzt",
-      "Salı": "Sal",
-      "Çarşamba": "Çar",
-      "Perşembe": "Per",
-      "Cuma": "Cum",
-      "Cumartesi": "Cmt",
-      "Pazar": "Paz"
-    };
-    const weeklyDayData = daysOrder.map(day => ({
-      day: dayLabels[day],
-      islem: dayCounts[day]
-    }));
 
     // Calculate Busiest Day
     let busiestDay = "Veri Yok";
@@ -260,8 +244,7 @@ export async function GET() {
       busiestHour,
       todayBeans,
       todayUniqueCustomers,
-      todayHourlyData,
-      weeklyDayData
+      todayHourlyData
     });
 
   } catch (error) {

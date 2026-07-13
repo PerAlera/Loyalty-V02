@@ -8,11 +8,21 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as
 export default function OwnerDashboard() {
   const { data: session } = useSession();
   const [stats, setStats] = useState<any>(null);
+  
+  // Weekly Chart State
+  const [weekOffset, setWeekOffset] = useState(0);
+  const [weeklyStats, setWeeklyStats] = useState<any>(null);
+  const [loadingWeekly, setLoadingWeekly] = useState(true);
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    fetchWeeklyData(weekOffset);
+  }, [weekOffset]);
 
   const fetchData = async () => {
     try {
@@ -22,6 +32,17 @@ export default function OwnerDashboard() {
       console.error(e);
     }
     setLoading(false);
+  };
+
+  const fetchWeeklyData = async (offset: number) => {
+    setLoadingWeekly(true);
+    try {
+      const res = await fetch(`/api/owner/stats/weekly?offset=${offset}`);
+      if (res.ok) setWeeklyStats(await res.json());
+    } catch (e) {
+      console.error(e);
+    }
+    setLoadingWeekly(false);
   };
 
   if (loading) return <div style={{ padding: "3rem", textAlign: "center" }}>Yükleniyor...</div>;
@@ -123,14 +144,37 @@ export default function OwnerDashboard() {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(350px, 1fr))", gap: "2rem" }}>
         
         {/* Haftalık Yoğunluk Dağılımı (Bar Chart) */}
-        <div className="surface-card" style={{ padding: "1.5rem" }}>
-          <h2 style={{ fontSize: "1.25rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <BarChart2 size={24} color="var(--primary)"/> Haftalık Yoğunluk Dağılımı
-          </h2>
-          <div style={{ width: '100%', height: 250 }}>
-            {stats?.weeklyDayData && stats.weeklyDayData.length > 0 ? (
+        <div className="surface-card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column" }}>
+          
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
+            <h2 style={{ fontSize: "1.25rem", margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <BarChart2 size={24} color="var(--primary)"/> Haftalık Yoğunluk
+            </h2>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", backgroundColor: "var(--bg-primary)", padding: "0.25rem 0.5rem", borderRadius: "2rem", border: "1px solid var(--border-color)" }}>
+              <button 
+                onClick={() => setWeekOffset(prev => prev - 1)}
+                style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", padding: "0.25rem", color: "var(--text-secondary)" }}
+              >
+                <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>{"<"}</span>
+              </button>
+              <span style={{ fontSize: "0.875rem", fontWeight: "bold", minWidth: "120px", textAlign: "center" }}>
+                {loadingWeekly ? "Yükleniyor..." : weeklyStats?.weekLabel || "Veri Yok"}
+              </span>
+              <button 
+                onClick={() => setWeekOffset(prev => prev + 1)}
+                disabled={weekOffset >= 0}
+                style={{ background: "none", border: "none", cursor: weekOffset >= 0 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", padding: "0.25rem", color: weekOffset >= 0 ? "var(--border-color)" : "var(--text-secondary)" }}
+              >
+                <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>{">"}</span>
+              </button>
+            </div>
+          </div>
+
+          <div style={{ width: '100%', height: 250, opacity: loadingWeekly ? 0.5 : 1, transition: "opacity 0.2s" }}>
+            {weeklyStats?.weeklyDayData && weeklyStats.weeklyDayData.length > 0 ? (
               <ResponsiveContainer>
-                <BarChart data={stats.weeklyDayData} margin={{ top: 5, right: 0, bottom: 5, left: -20 }}>
+                <BarChart data={weeklyStats.weeklyDayData} margin={{ top: 5, right: 0, bottom: 5, left: -20 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                   <XAxis dataKey="day" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                   <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
@@ -140,7 +184,7 @@ export default function OwnerDashboard() {
               </ResponsiveContainer>
             ) : (
               <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-secondary)" }}>
-                Yeterli veri bulunamadı.
+                Bu haftaya ait veri yok.
               </div>
             )}
           </div>
