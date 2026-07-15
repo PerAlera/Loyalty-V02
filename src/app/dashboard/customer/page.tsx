@@ -249,13 +249,14 @@ export default function CustomerHome() {
 
   return (
     <div style={{ 
-      height: "100vh", // Change to fixed 100vh
+      minHeight: "100dvh", 
       display: "flex", 
       flexDirection: "column",
-      padding: "1.5rem 1rem", // Reduced padding
+      padding: "1.5rem 1rem", 
       backgroundColor: "var(--bg-primary)",
       position: "relative",
-      overflow: "hidden" // Prevent scrolling
+      overflowX: "hidden",
+      overflowY: "auto"
     }}>
       
       {/* Üst Bar: Logo ve Profil */}
