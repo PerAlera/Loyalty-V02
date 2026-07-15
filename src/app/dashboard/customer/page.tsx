@@ -24,6 +24,7 @@ export default function CustomerHome() {
   const [successMessage, setSuccessMessage] = useState("");
   const [redeemToken, setRedeemToken] = useState<string | null>(null);
   const [redeemType, setRedeemType] = useState<"COFFEE" | "FOOD" | null>(null);
+  const [activeTab, setActiveTab] = useState<"COFFEE" | "FOOD">("COFFEE");
 
   // Polling ref
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
@@ -264,135 +265,178 @@ export default function CustomerHome() {
           </div>
         </div>
 
-        {/* İLERLEME ÇUBUKLARI */}
-        <div style={{ width: "100%", maxWidth: "320px", padding: "0 1rem", marginBottom: "2rem", display: "flex", flexDirection: "column", gap: "2rem" }}>
-          
-          {/* Kahve İlerlemesi */}
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-              <span style={{ fontSize: "0.875rem", fontWeight: "bold", color: "var(--text-secondary)" }}>Kahve Çekirdekleri</span>
-              <span style={{ fontSize: "0.875rem", color: "var(--primary)" }}>{currentBeans} / {requiredCoffees}</span>
-            </div>
-            <div style={{ 
-              display: "flex", 
-              justifyContent: "space-between", 
-              position: "relative",
-              alignItems: "center"
+        {/* İLERLEME ÇUBUKLARI (3D FLIP CARD) */}
+        <div style={{ 
+          perspective: "1000px", 
+          width: "100%", 
+          maxWidth: "320px", 
+          margin: "0 auto 2rem auto", 
+          height: "120px" 
+        }} onClick={() => setActiveTab(prev => prev === "COFFEE" ? "FOOD" : "COFFEE")}>
+          <div style={{
+            position: "relative",
+            width: "100%",
+            height: "100%",
+            transition: "transform 0.6s",
+            transformStyle: "preserve-3d",
+            transform: activeTab === "COFFEE" ? "rotateY(0deg)" : "rotateY(180deg)",
+            cursor: "pointer"
+          }}>
+            
+            {/* Kahve İlerlemesi (FRONT) */}
+            <div style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              backfaceVisibility: "hidden",
+              backgroundColor: "var(--bg-primary)",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              padding: "0 1rem"
             }}>
-              <div style={{
-                position: "absolute",
-                top: "50%",
-                left: "0",
-                right: "0",
-                height: "2px",
-                backgroundColor: "#000",
-                zIndex: 0,
-                transform: "translateY(-50%)"
-              }}></div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <span style={{ fontSize: "0.875rem", fontWeight: "bold", color: "var(--text-secondary)" }}>Kahve Çekirdekleri</span>
+                <span style={{ fontSize: "0.875rem", color: "var(--primary)" }}>{currentBeans} / {requiredCoffees}</span>
+              </div>
+              <div style={{ 
+                display: "flex", 
+                justifyContent: "space-between", 
+                position: "relative",
+                alignItems: "center"
+              }}>
+                <div style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "0",
+                  right: "0",
+                  height: "2px",
+                  backgroundColor: "#000",
+                  zIndex: 0,
+                  transform: "translateY(-50%)"
+                }}></div>
 
-              {Array.from({ length: requiredCoffees }).map((_, i) => {
-                const isLast = i === requiredCoffees - 1;
-                return (
-                  <div key={i} style={{ 
-                    zIndex: 1, 
-                    backgroundColor: "var(--bg-primary)",
-                    padding: "2px"
-                  }}>
-                    {i < progressCoffee ? (
-                      <div style={{
-                        width: isLast ? "24px" : "16px",
-                        height: isLast ? "24px" : "16px",
-                        backgroundColor: isLast ? "var(--primary)" : "#000",
-                        borderRadius: "50%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center"
-                      }}>
-                        {isLast ? <Coffee size={14} color="white" /> : <Check size={10} color="white" strokeWidth={4} />}
-                      </div>
-                    ) : (
-                      <div style={{
-                        width: isLast ? "24px" : "16px",
-                        height: isLast ? "24px" : "16px",
-                        backgroundColor: "white",
-                        border: "2px solid #000",
-                        borderRadius: "50%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center"
-                      }}>
-                        {isLast && <Coffee size={14} color="#000" />}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                {Array.from({ length: requiredCoffees }).map((_, i) => {
+                  const isLast = i === requiredCoffees - 1;
+                  return (
+                    <div key={i} style={{ 
+                      zIndex: 1, 
+                      backgroundColor: "var(--bg-primary)",
+                      padding: "2px"
+                    }}>
+                      {i < progressCoffee ? (
+                        <div style={{
+                          width: isLast ? "24px" : "16px",
+                          height: isLast ? "24px" : "16px",
+                          backgroundColor: isLast ? "var(--primary)" : "#000",
+                          borderRadius: "50%",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center"
+                        }}>
+                          {isLast ? <Coffee size={14} color="white" /> : <Check size={10} color="white" strokeWidth={4} />}
+                        </div>
+                      ) : (
+                        <div style={{
+                          width: isLast ? "24px" : "16px",
+                          height: isLast ? "24px" : "16px",
+                          backgroundColor: "white",
+                          border: "2px solid #000",
+                          borderRadius: "50%",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center"
+                        }}>
+                          {isLast && <Coffee size={14} color="#000" />}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ textAlign: "center", fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "1.5rem" }}>
+                🍔 Yemek Puanları için Dokun 🔄
+              </div>
             </div>
-          </div>
 
-          {/* Yemek İlerlemesi */}
-          <div>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
-              <span style={{ fontSize: "0.875rem", fontWeight: "bold", color: "var(--text-secondary)" }}>Yemek Puanları</span>
-              <span style={{ fontSize: "0.875rem", color: "#F59E0B" }}>{currentFood} / {requiredFoods}</span>
-            </div>
-            <div style={{ 
-              display: "flex", 
-              justifyContent: "space-between", 
-              position: "relative",
-              alignItems: "center"
+            {/* Yemek İlerlemesi (BACK) */}
+            <div style={{
+              position: "absolute",
+              width: "100%",
+              height: "100%",
+              backfaceVisibility: "hidden",
+              backgroundColor: "var(--bg-primary)",
+              transform: "rotateY(180deg)",
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              padding: "0 1rem"
             }}>
-              <div style={{
-                position: "absolute",
-                top: "50%",
-                left: "0",
-                right: "0",
-                height: "2px",
-                backgroundColor: "#000",
-                zIndex: 0,
-                transform: "translateY(-50%)"
-              }}></div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
+                <span style={{ fontSize: "0.875rem", fontWeight: "bold", color: "var(--text-secondary)" }}>Yemek Puanları</span>
+                <span style={{ fontSize: "0.875rem", color: "#F59E0B" }}>{currentFood} / {requiredFoods}</span>
+              </div>
+              <div style={{ 
+                display: "flex", 
+                justifyContent: "space-between", 
+                position: "relative",
+                alignItems: "center"
+              }}>
+                <div style={{
+                  position: "absolute",
+                  top: "50%",
+                  left: "0",
+                  right: "0",
+                  height: "2px",
+                  backgroundColor: "#000",
+                  zIndex: 0,
+                  transform: "translateY(-50%)"
+                }}></div>
 
-              {Array.from({ length: requiredFoods }).map((_, i) => {
-                const isLast = i === requiredFoods - 1;
-                return (
-                  <div key={i} style={{ 
-                    zIndex: 1, 
-                    backgroundColor: "var(--bg-primary)",
-                    padding: "2px"
-                  }}>
-                    {i < progressFood ? (
-                      <div style={{
-                        width: isLast ? "24px" : "16px",
-                        height: isLast ? "24px" : "16px",
-                        backgroundColor: isLast ? "#F59E0B" : "#000",
-                        borderRadius: "50%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center"
-                      }}>
-                        {isLast ? <Gift size={14} color="white" /> : <Check size={10} color="white" strokeWidth={4} />}
-                      </div>
-                    ) : (
-                      <div style={{
-                        width: isLast ? "24px" : "16px",
-                        height: isLast ? "24px" : "16px",
-                        backgroundColor: "white",
-                        border: "2px solid #000",
-                        borderRadius: "50%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center"
-                      }}>
-                        {isLast && <Gift size={14} color="#000" />}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
+                {Array.from({ length: requiredFoods }).map((_, i) => {
+                  const isLast = i === requiredFoods - 1;
+                  return (
+                    <div key={i} style={{ 
+                      zIndex: 1, 
+                      backgroundColor: "var(--bg-primary)",
+                      padding: "2px"
+                    }}>
+                      {i < progressFood ? (
+                        <div style={{
+                          width: isLast ? "24px" : "16px",
+                          height: isLast ? "24px" : "16px",
+                          backgroundColor: isLast ? "#F59E0B" : "#000",
+                          borderRadius: "50%",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center"
+                        }}>
+                          {isLast ? <Gift size={14} color="white" /> : <Check size={10} color="white" strokeWidth={4} />}
+                        </div>
+                      ) : (
+                        <div style={{
+                          width: isLast ? "24px" : "16px",
+                          height: isLast ? "24px" : "16px",
+                          backgroundColor: "white",
+                          border: "2px solid #000",
+                          borderRadius: "50%",
+                          display: "flex",
+                          justifyContent: "center",
+                          alignItems: "center"
+                        }}>
+                          {isLast && <Gift size={14} color="#000" />}
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ textAlign: "center", fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "1.5rem" }}>
+                ☕ Kahve Puanları için Dokun 🔄
+              </div>
             </div>
-          </div>
 
+          </div>
         </div>
 
         {/* Butonlar */}
