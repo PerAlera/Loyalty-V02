@@ -215,16 +215,18 @@ export default function CustomerHome() {
           width: "100%", 
           maxWidth: "320px", 
           margin: "0 auto 2rem auto", 
-          height: "360px" // Yükseklik arttırıldı (İllüstrasyon + Bar)
+          height: "360px",
+          display: "flex",
+          flexDirection: "column",
+          cursor: "pointer"
         }} onClick={() => setActiveTab(prev => prev === "COFFEE" ? "FOOD" : "COFFEE")}>
           <div style={{
             position: "relative",
             width: "100%",
-            height: "100%",
+            flex: 1,
             transition: "transform 0.6s",
             transformStyle: "preserve-3d",
-            transform: activeTab === "COFFEE" ? "rotateY(0deg)" : "rotateY(180deg)",
-            cursor: "pointer"
+            transform: activeTab === "COFFEE" ? "rotateY(0deg)" : "rotateY(180deg)"
           }}>
             
             {/* ---------------- FRONT: KAHVE ---------------- */}
@@ -300,9 +302,6 @@ export default function CustomerHome() {
                   })}
                 </div>
               </div>
-              <div style={{ textAlign: "center", fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "1.5rem" }}>
-                🍔 Yemek Puanları için Dokun 🔄
-              </div>
             </div>
 
             {/* ---------------- BACK: YEMEK ---------------- */}
@@ -370,11 +369,26 @@ export default function CustomerHome() {
                   })}
                 </div>
               </div>
-              <div style={{ textAlign: "center", fontSize: "0.75rem", color: "var(--text-secondary)", marginTop: "1.5rem" }}>
-                ☕ Kahve Puanları için Dokun 🔄
-              </div>
             </div>
 
+          </div>
+
+          {/* İndikatör (Noktalar) */}
+          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "8px", marginTop: "1rem" }}>
+            <div style={{
+              width: activeTab === "COFFEE" ? "24px" : "8px",
+              height: "8px",
+              borderRadius: "4px",
+              backgroundColor: activeTab === "COFFEE" ? "var(--primary)" : "#ccc",
+              transition: "all 0.3s ease"
+            }} />
+            <div style={{
+              width: activeTab === "FOOD" ? "24px" : "8px",
+              height: "8px",
+              borderRadius: "4px",
+              backgroundColor: activeTab === "FOOD" ? "#F59E0B" : "#ccc",
+              transition: "all 0.3s ease"
+            }} />
           </div>
         </div>
 
