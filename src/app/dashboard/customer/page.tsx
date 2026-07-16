@@ -250,8 +250,8 @@ export default function CustomerHome() {
       {/* Üst Bar: Logo, Hoşgeldin ve Profil */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
         <div style={{ 
-          width: "50px",
-          height: "50px",
+          width: "75px",
+          height: "75px",
           position: "relative"
         }}>
           <Image src="/logo.svg" alt="Jay's Cafe Logo" fill style={{ objectFit: "contain" }} priority />
