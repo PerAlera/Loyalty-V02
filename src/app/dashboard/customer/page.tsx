@@ -168,8 +168,8 @@ export default function CustomerHome() {
       width: "100%", height: "100%", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "flex-start", padding: "0 0.5rem"
     }}>
-      <div style={{ width: "220px", height: "260px", position: "relative", marginBottom: "1.5rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Image src="/kahve.svg" alt="Kahve" width={220} height={260} style={{ objectFit: "contain" }} priority />
+      <div style={{ width: "240px", height: "280px", position: "relative", marginBottom: "1rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Image src="/kahve.svg" alt="Kahve" width={240} height={280} style={{ objectFit: "contain" }} priority />
       </div>
       <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
@@ -204,8 +204,8 @@ export default function CustomerHome() {
       width: "100%", height: "100%", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "flex-start", padding: "0 0.5rem"
     }}>
-      <div style={{ width: "220px", height: "260px", position: "relative", marginBottom: "1.5rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Image src="/yemek.svg" alt="Yemek" width={220} height={260} style={{ objectFit: "contain" }} priority />
+      <div style={{ width: "240px", height: "280px", position: "relative", marginBottom: "1rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Image src="/yemek.svg" alt="Yemek" width={240} height={280} style={{ objectFit: "contain" }} priority />
       </div>
       <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
@@ -284,40 +284,40 @@ export default function CustomerHome() {
         </h1>
 
         {/* 3D KÜP (SONSUZ DÖNGÜ) */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: "340px", margin: "0 auto 2rem auto", gap: "0.5rem" }}>
-          <button onClick={() => setRotation(r => r + 90)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: "380px", margin: "0 auto 2rem auto", gap: "0.25rem" }}>
+          <button onClick={() => setRotation(r => r + 90)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0.25rem" }}>
             <span style={{ fontSize: "2rem", color: "var(--primary)" }}>{"<"}</span>
           </button>
 
-          <div style={{ perspective: "1000px", width: "240px", height: "340px", position: "relative" }}>
+          <div style={{ perspective: "1000px", width: "260px", height: "360px", position: "relative" }}>
             <div style={{
               position: "absolute",
               width: "100%",
               height: "100%",
               transition: "transform 0.8s cubic-bezier(0.4, 0, 0.2, 1)",
               transformStyle: "preserve-3d",
-              transform: `translateZ(-120px) rotateY(${rotation}deg)`
+              transform: `translateZ(-130px) rotateY(${rotation}deg)`
             }}>
               {/* Ön Yüz (0 deg) - Kahve */}
-              <div style={{ position: "absolute", width: "240px", height: "340px", backfaceVisibility: "hidden", transform: "rotateY(0deg) translateZ(120px)", backgroundColor: "var(--bg-primary)" }}>
+              <div style={{ position: "absolute", width: "260px", height: "360px", backfaceVisibility: "hidden", transform: "rotateY(0deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
                 {renderCoffeeFace()}
               </div>
               {/* Sağ Yüz (90 deg) - Yemek */}
-              <div style={{ position: "absolute", width: "240px", height: "340px", backfaceVisibility: "hidden", transform: "rotateY(90deg) translateZ(120px)", backgroundColor: "var(--bg-primary)" }}>
+              <div style={{ position: "absolute", width: "260px", height: "360px", backfaceVisibility: "hidden", transform: "rotateY(90deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
                 {renderFoodFace()}
               </div>
               {/* Arka Yüz (180 deg) - Kahve */}
-              <div style={{ position: "absolute", width: "240px", height: "340px", backfaceVisibility: "hidden", transform: "rotateY(180deg) translateZ(120px)", backgroundColor: "var(--bg-primary)" }}>
+              <div style={{ position: "absolute", width: "260px", height: "360px", backfaceVisibility: "hidden", transform: "rotateY(180deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
                 {renderCoffeeFace()}
               </div>
               {/* Sol Yüz (-90 deg) - Yemek */}
-              <div style={{ position: "absolute", width: "240px", height: "340px", backfaceVisibility: "hidden", transform: "rotateY(-90deg) translateZ(120px)", backgroundColor: "var(--bg-primary)" }}>
+              <div style={{ position: "absolute", width: "260px", height: "360px", backfaceVisibility: "hidden", transform: "rotateY(-90deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
                 {renderFoodFace()}
               </div>
             </div>
           </div>
 
-          <button onClick={() => setRotation(r => r - 90)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0.5rem" }}>
+          <button onClick={() => setRotation(r => r - 90)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0.25rem" }}>
             <span style={{ fontSize: "2rem", color: "var(--primary)" }}>{">"}</span>
           </button>
         </div>
