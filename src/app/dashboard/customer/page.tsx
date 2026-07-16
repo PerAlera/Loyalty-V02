@@ -168,8 +168,8 @@ export default function CustomerHome() {
       width: "100%", height: "100%", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "flex-start", padding: "0 0.5rem"
     }}>
-      <div style={{ width: "120px", height: "160px", position: "relative", marginBottom: "2rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Image src="/kahve.svg" alt="Kahve" width={120} height={160} style={{ objectFit: "contain" }} priority />
+      <div style={{ width: "180px", height: "220px", position: "relative", marginBottom: "1.5rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Image src="/kahve.svg" alt="Kahve" width={180} height={220} style={{ objectFit: "contain" }} priority />
       </div>
       <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
@@ -204,8 +204,8 @@ export default function CustomerHome() {
       width: "100%", height: "100%", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "flex-start", padding: "0 0.5rem"
     }}>
-      <div style={{ width: "120px", height: "160px", position: "relative", marginBottom: "2rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Image src="/yemek.svg" alt="Yemek" width={120} height={160} style={{ objectFit: "contain" }} priority />
+      <div style={{ width: "180px", height: "220px", position: "relative", marginBottom: "1.5rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Image src="/yemek.svg" alt="Yemek" width={180} height={220} style={{ objectFit: "contain" }} priority />
       </div>
       <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
