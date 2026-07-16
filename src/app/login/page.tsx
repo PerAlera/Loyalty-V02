@@ -4,6 +4,7 @@ import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./login.module.css";
 
 export default function LoginPage() {
@@ -36,7 +37,9 @@ export default function LoginPage() {
   return (
     <div className={styles.authContainer}>
       <div className={`fade-in ${styles.authCard}`}>
-        <h1 className={styles.authTitle}>Jay's Cafe</h1>
+        <div style={{ width: "120px", height: "120px", position: "relative", margin: "0 auto 1rem auto" }}>
+          <Image src="/logo.svg" alt="Jay's Cafe Logo" fill style={{ objectFit: "contain" }} priority />
+        </div>
         <p className={styles.authSubtitle}>Giriş yapmak için bilgilerinizi girin.</p>
 
         {error && <div className={styles.errorText}>{error}</div>}

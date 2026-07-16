@@ -250,21 +250,11 @@ export default function CustomerHome() {
       {/* Üst Bar: Logo, Hoşgeldin ve Profil */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
         <div style={{ 
-          fontFamily: "var(--font-caveat)", 
-          fontSize: "1.3rem", 
-          fontWeight: "bold",
-          border: "2px solid var(--primary)",
-          borderRadius: "50%",
-          width: "46px",
-          height: "46px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          textAlign: "center",
-          lineHeight: 1,
-          color: "var(--primary)"
+          width: "50px",
+          height: "50px",
+          position: "relative"
         }}>
-          Jay's<br/><span style={{fontSize: "0.7rem"}}>Cafe</span>
+          <Image src="/logo.svg" alt="Jay's Cafe Logo" fill style={{ objectFit: "contain" }} priority />
         </div>
 
         <h1 className="font-caveat" style={{ 

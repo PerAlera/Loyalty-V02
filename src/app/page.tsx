@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import Image from "next/image";
 import styles from './page.module.css';
 
 export default function Home() {
@@ -44,22 +45,12 @@ export default function Home() {
       <div className="container fade-in">
         <div className={styles.hero} style={{ textAlign: "center", padding: "2rem" }}>
           <div style={{ 
-            fontFamily: "var(--font-caveat)", 
-            fontSize: "2rem", 
-            fontWeight: "bold",
-            border: "2px solid var(--primary)",
-            borderRadius: "50%",
-            width: "80px",
-            height: "80px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            textAlign: "center",
-            lineHeight: 1,
-            color: "var(--primary)",
-            margin: "0 auto 2rem auto"
+            width: "120px",
+            height: "120px",
+            margin: "0 auto 2rem auto",
+            position: "relative"
           }}>
-            Jay's<br/><span style={{fontSize: "1rem"}}>Cafe</span>
+            <Image src="/logo.svg" alt="Jay's Cafe Logo" fill style={{ objectFit: "contain" }} priority />
           </div>
           <h1 className="font-caveat" style={{ fontSize: "3.5rem", marginBottom: "1rem", color: "var(--text-primary)", lineHeight: 1 }}>Sana Özel<br/>Sadakat Sistemi</h1>
           <p style={{ color: "var(--text-secondary)", marginBottom: "3rem", fontSize: "1.125rem" }}>Kahveni iç, puanını topla, bedava kahveni kazan!</p>
