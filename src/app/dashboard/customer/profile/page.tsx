@@ -22,6 +22,10 @@ export default function ProfilePage() {
   const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState("");
 
+  // Support form state
+  const [supportMessage, setSupportMessage] = useState("");
+  const [sendingSupport, setSendingSupport] = useState(false);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -81,6 +85,29 @@ export default function ProfilePage() {
       alert("Bir hata oluştu.");
     }
     setSaving(false);
+  };
+
+  const handleSendSupport = async () => {
+    if (!supportMessage.trim()) return;
+    setSendingSupport(true);
+    try {
+      const res = await fetch("/api/customer/support", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: supportMessage })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert(data.message || "Mesajınız başarıyla iletildi.");
+        setSupportMessage("");
+        setModal("NONE");
+      } else {
+        alert(data.error || "Mesaj gönderilirken bir hata oluştu.");
+      }
+    } catch (e) {
+      alert("Bir hata oluştu.");
+    }
+    setSendingSupport(false);
   };
 
   if (loading) return <div style={{ padding: "3rem", textAlign: "center" }}>Yükleniyor...</div>;
@@ -198,10 +225,24 @@ export default function ProfilePage() {
                 <HelpCircle size={48} color="var(--primary)" style={{ marginBottom: "1rem" }} />
                 <h2 className="font-caveat" style={{ fontSize: "2rem", marginBottom: "1rem" }}>Bize Ulaşın</h2>
                 <p style={{ color: "var(--text-secondary)", marginBottom: "1.5rem" }}>
-                  Soru, görüş ve önerileriniz için aşağıdaki e-posta adresinden bize ulaşabilirsiniz.
+                  Soru, görüş ve önerilerinizi aşağıdan bize doğrudan iletebilirsiniz.
                 </p>
-                <div style={{ padding: "1rem", backgroundColor: "rgba(101, 67, 33, 0.1)", borderRadius: "1rem", fontWeight: "bold", color: "var(--primary)" }}>
-                  iletisim@jayscafe.com
+                <div style={{ width: "100%", textAlign: "left", display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  <textarea 
+                    value={supportMessage}
+                    onChange={(e) => setSupportMessage(e.target.value)}
+                    placeholder="Mesajınızı buraya yazın..."
+                    rows={5}
+                    style={{ width: "100%", padding: "0.75rem", borderRadius: "0.5rem", border: "2px solid var(--primary)", outline: "none", fontFamily: "inherit", resize: "none" }}
+                  />
+                  <button 
+                    className="btn-primary" 
+                    onClick={handleSendSupport} 
+                    disabled={sendingSupport || !supportMessage.trim()}
+                    style={{ padding: "1rem", display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem" }}
+                  >
+                    {sendingSupport ? <Loader2 className="animate-spin" size={20} /> : "Gönder"}
+                  </button>
                 </div>
               </>
             )}
