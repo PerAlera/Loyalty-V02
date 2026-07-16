@@ -10,7 +10,8 @@ export default function ProfilePage() {
   const router = useRouter();
   
   const [wallet, setWallet] = useState<{ beans: number } | null>(null);
-  const [profileData, setProfileData] = useState<{ name: string, surname: string, phone: string, birthDate: string | null, gender: string | null } | null>(null);
+  const [profileData, setProfileData] = useState<{ name: string, surname: string, phone: string, birthDate: string | null, gender: string | null, email: string | null, profileRewardClaimed: boolean } | null>(null);
+  const [rewardSettings, setRewardSettings] = useState<{ enabled: boolean, amount: number }>({ enabled: false, amount: 1 });
   
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -20,6 +21,7 @@ export default function ProfilePage() {
   // Edit form state
   const [birthDate, setBirthDate] = useState("");
   const [gender, setGender] = useState("");
+  const [email, setEmail] = useState("");
 
   useEffect(() => {
     fetchData();
@@ -35,6 +37,7 @@ export default function ProfilePage() {
       if (walletRes.ok) {
         const data = await walletRes.json();
         setWallet(data.wallet);
+        setRewardSettings({ enabled: data.profileRewardEnabled, amount: data.profileRewardAmount });
       }
       
       if (profileRes.ok) {
@@ -47,6 +50,9 @@ export default function ProfilePage() {
         }
         if (data.user.gender) {
           setGender(data.user.gender);
+        }
+        if (data.user.email) {
+          setEmail(data.user.email);
         }
       }
     } catch (e) {
@@ -63,14 +69,16 @@ export default function ProfilePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           birthDate: birthDate || null,
-          gender: gender || null
+          gender: gender || null,
+          email: email || null
         })
       });
       if (res.ok) {
         const data = await res.json();
         setProfileData(data.user);
         setModal("NONE");
-        alert("Profiliniz başarıyla güncellendi!");
+        alert(data.message || "Profiliniz başarıyla güncellendi!");
+        fetchData(); // Refresh wallet if reward granted
       } else {
         alert("Güncelleme başarısız oldu.");
       }
@@ -104,6 +112,16 @@ export default function ProfilePage() {
         <h2>{profileData?.name || session?.user?.name} {profileData?.surname || session?.user?.surname}</h2>
         <p style={{ color: "var(--text-secondary)" }}>Müşteri Hesabı</p>
       </div>
+
+      {/* Profil Ödülü Banner */}
+      {rewardSettings.enabled && profileData && !profileData.profileRewardClaimed && (
+        <div style={{ backgroundColor: "rgba(217, 119, 6, 0.1)", border: "1px solid var(--primary)", borderRadius: "1rem", padding: "1rem", marginBottom: "2rem", textAlign: "center" }}>
+          <h3 style={{ color: "var(--primary)", margin: "0 0 0.5rem 0", fontSize: "1.1rem" }}>Profilini Tamamla, Kazan! 🎁</h3>
+          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", margin: 0 }}>
+            Doğum tarihi, cinsiyet ve e-posta bilgilerini kaydet, anında <strong>{rewardSettings.amount} Kahve Çekirdeği</strong> hediye kazan.
+          </p>
+        </div>
+      )}
 
       {/* Cüzdan Özeti */}
       <div className="surface-card" style={{ marginBottom: "2rem", padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", border: "2px solid var(--primary)" }}>
@@ -211,6 +229,16 @@ export default function ProfilePage() {
                     <div style={{ padding: "0.75rem", backgroundColor: "var(--bg-primary)", borderRadius: "0.5rem", border: "1px solid var(--border-color)", color: "var(--text-secondary)" }}>
                       {profileData?.phone}
                     </div>
+                  </div>
+                  <div>
+                    <label style={{ fontSize: "0.875rem", color: "var(--primary)", fontWeight: 500 }}>E-Posta Adresi</label>
+                    <input 
+                      type="email" 
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="ornek@mail.com"
+                      style={{ width: "100%", padding: "0.75rem", borderRadius: "0.5rem", border: "2px solid var(--primary)", outline: "none", fontFamily: "inherit" }}
+                    />
                   </div>
                   <div>
                     <label style={{ fontSize: "0.875rem", color: "var(--primary)", fontWeight: 500 }}>Doğum Tarihi</label>

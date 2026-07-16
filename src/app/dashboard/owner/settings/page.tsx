@@ -6,7 +6,7 @@ import { signOut } from "next-auth/react";
 
 export default function OwnerSettingsPage() {
   const [settings, setSettings] = useState<any>(null);
-  const [newSettings, setNewSettings] = useState({ requiredCoffees: 10, requiredFoods: 10 });
+  const [newSettings, setNewSettings] = useState({ requiredCoffees: 10, requiredFoods: 10, profileRewardEnabled: false, profileRewardAmount: 1 });
   const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +22,9 @@ export default function OwnerSettingsPage() {
         setSettings(data.settings);
         setNewSettings({ 
           requiredCoffees: data.settings.requiredCoffees,
-          requiredFoods: data.settings.requiredFoods || 10
+          requiredFoods: data.settings.requiredFoods || 10,
+          profileRewardEnabled: data.settings.profileRewardEnabled || false,
+          profileRewardAmount: data.settings.profileRewardAmount || 1
         });
       }
     } catch (e) {
@@ -109,6 +111,37 @@ export default function OwnerSettingsPage() {
               Müşteriler, belirlediğiniz adette yemek puanı topladığında 1 adet ücretsiz yemek ödülü kazanır. (Mevcut: {settings?.requiredFoods || 10})
             </p>
           </div>
+
+          <hr style={{ borderColor: "var(--border-color)", margin: "1rem 0" }} />
+
+          <div className="form-group" style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            <input 
+              type="checkbox" 
+              checked={newSettings.profileRewardEnabled}
+              onChange={e => setNewSettings({ ...newSettings, profileRewardEnabled: e.target.checked })}
+              style={{ width: "20px", height: "20px" }}
+            />
+            <label className="form-label" style={{ marginBottom: 0 }}>Profil Tamamlama Ödülü Aktif</label>
+          </div>
+          
+          {newSettings.profileRewardEnabled && (
+            <div className="form-group">
+              <label className="form-label">Verilecek Kahve Çekirdeği Miktarı</label>
+              <input 
+                type="number" 
+                min="1" 
+                max="10"
+                className="form-input" 
+                value={newSettings.profileRewardAmount} 
+                onChange={e => setNewSettings({ ...newSettings, profileRewardAmount: parseInt(e.target.value) })}
+                required 
+              />
+              <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginTop: "0.5rem" }}>
+                Müşteri profilini (Email, Cinsiyet, Doğum Tarihi) doldurduğunda kazanacağı hediye çekirdek sayısı.
+              </p>
+            </div>
+          )}
+
           <button type="submit" className="btn-primary" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem" }}>
             <Save size={20} /> Ayarları Kaydet
           </button>

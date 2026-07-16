@@ -14,10 +14,12 @@ model User {
   name         String
   surname      String
   role         Role          @default(CUSTOMER)
-  birthDate    DateTime?
-  gender       String?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  birthDate            DateTime?
+  gender               String?
+  email                String?
+  profileRewardClaimed Boolean       @default(false)
+  createdAt            DateTime      @default(now())
+  updatedAt            DateTime      @updatedAt
 
   wallets      Wallet[]
   transactions Transaction[] @relation("UserTransactions")
@@ -58,10 +60,12 @@ model StoreSettings {
   id              String   @id @default(cuid())
   storeId         String   @unique
   store           Store    @relation(fields: [storeId], references: [id])
-  requiredCoffees Int      @default(10)
-  requiredFoods   Int      @default(10)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  requiredCoffees      Int      @default(10)
+  requiredFoods        Int      @default(10)
+  profileRewardEnabled Boolean  @default(false)
+  profileRewardAmount  Int      @default(1)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
 }
 
 model Wallet {

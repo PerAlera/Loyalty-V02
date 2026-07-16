@@ -35,7 +35,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { requiredCoffees, requiredFoods } = body;
+    const { requiredCoffees, requiredFoods, profileRewardEnabled, profileRewardAmount } = body;
 
     if (!requiredCoffees || requiredCoffees < 1 || !requiredFoods || requiredFoods < 1) {
       return NextResponse.json({ error: "Geçersiz değer" }, { status: 400 });
@@ -48,7 +48,9 @@ export async function PUT(req: Request) {
       where: { storeId: store.id },
       data: { 
         requiredCoffees: parseInt(requiredCoffees),
-        requiredFoods: parseInt(requiredFoods)
+        requiredFoods: parseInt(requiredFoods),
+        profileRewardEnabled: profileRewardEnabled ?? false,
+        profileRewardAmount: profileRewardAmount ? parseInt(profileRewardAmount) : 1
       }
     });
 
