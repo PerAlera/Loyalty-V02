@@ -43,7 +43,7 @@ export async function PUT(req: Request) {
     }
 
     const body = await req.json();
-    const { birthDate, gender, email } = body;
+    const { birthDate, gender } = body;
 
     const user = await prisma.user.findUnique({ where: { id: session.user.id } });
     if (!user) return NextResponse.json({ error: "Kullanıcı bulunamadı" }, { status: 404 });
@@ -51,18 +51,16 @@ export async function PUT(req: Request) {
     let updateData: any = {};
     if (birthDate !== undefined) updateData.birthDate = birthDate ? new Date(birthDate) : null;
     if (gender !== undefined) updateData.gender = gender || null;
-    if (email !== undefined) updateData.email = email || null;
 
     // Check if profile is complete now
     const willHaveBirthDate = birthDate !== undefined ? !!birthDate : !!user.birthDate;
     const willHaveGender = gender !== undefined ? !!gender : !!user.gender;
-    const willHaveEmail = email !== undefined ? !!email : !!user.email;
 
     const storeSettings = await prisma.storeSettings.findFirst({ orderBy: { updatedAt: 'desc' } });
     
     let rewardGranted = false;
 
-    if (storeSettings?.profileRewardEnabled && !user.profileRewardClaimed && willHaveBirthDate && willHaveGender && willHaveEmail) {
+    if (storeSettings?.profileRewardEnabled && !user.profileRewardClaimed && willHaveBirthDate && willHaveGender) {
       updateData.profileRewardClaimed = true;
       rewardGranted = true;
     }

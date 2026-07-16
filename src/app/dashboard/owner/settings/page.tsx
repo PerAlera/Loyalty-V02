@@ -137,7 +137,7 @@ export default function OwnerSettingsPage() {
                 required 
               />
               <p style={{ fontSize: "0.875rem", color: "var(--text-secondary)", marginTop: "0.5rem" }}>
-                Müşteri profilini (Email, Cinsiyet, Doğum Tarihi) doldurduğunda kazanacağı hediye çekirdek sayısı.
+                Müşteri profilini (Cinsiyet, Doğum Tarihi) doldurduğunda kazanacağı hediye çekirdek sayısı.
               </p>
             </div>
           )}
