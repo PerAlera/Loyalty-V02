@@ -7,6 +7,7 @@ import { signOut } from "next-auth/react";
 export default function OwnerSettingsPage() {
   const [settings, setSettings] = useState<any>(null);
   const [newSettings, setNewSettings] = useState({ requiredCoffees: 10, requiredFoods: 10 });
+  const [passwords, setPasswords] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -42,6 +43,26 @@ export default function OwnerSettingsPage() {
       fetchData();
     } else {
       alert("Hata oluştu.");
+    }
+  };
+
+  const handleChangePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwords.newPassword !== passwords.confirmPassword) {
+      alert("Yeni şifreler eşleşmiyor!");
+      return;
+    }
+    const res = await fetch("/api/owner/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ currentPassword: passwords.currentPassword, newPassword: passwords.newPassword })
+    });
+    const data = await res.json();
+    if (res.ok) {
+      alert(data.message);
+      setPasswords({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } else {
+      alert(data.error || "Hata oluştu.");
     }
   };
 
@@ -90,6 +111,47 @@ export default function OwnerSettingsPage() {
           </div>
           <button type="submit" className="btn-primary" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem" }}>
             <Save size={20} /> Ayarları Kaydet
+          </button>
+        </form>
+      </div>
+
+      <div className="surface-card" style={{ marginBottom: "2rem" }}>
+        <h2 style={{ fontSize: "1.125rem", marginBottom: "1rem" }}>Şifre Değiştir</h2>
+        <form onSubmit={handleChangePassword} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div className="form-group">
+            <label className="form-label">Mevcut Şifreniz</label>
+            <input 
+              type="password" 
+              className="form-input" 
+              value={passwords.currentPassword} 
+              onChange={e => setPasswords({ ...passwords, currentPassword: e.target.value })}
+              required 
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Yeni Şifreniz</label>
+            <input 
+              type="password" 
+              className="form-input" 
+              value={passwords.newPassword} 
+              onChange={e => setPasswords({ ...passwords, newPassword: e.target.value })}
+              required 
+              minLength={6}
+            />
+          </div>
+          <div className="form-group">
+            <label className="form-label">Yeni Şifreniz (Tekrar)</label>
+            <input 
+              type="password" 
+              className="form-input" 
+              value={passwords.confirmPassword} 
+              onChange={e => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+              required 
+              minLength={6}
+            />
+          </div>
+          <button type="submit" className="btn-secondary" style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "0.5rem", width: "100%" }}>
+            <Save size={20} /> Şifreyi Güncelle
           </button>
         </form>
       </div>
