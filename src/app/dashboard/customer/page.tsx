@@ -247,16 +247,16 @@ export default function CustomerHome() {
       overflowY: "auto"
     }}>
       
-      {/* Üst Bar: Logo ve Profil */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+      {/* Üst Bar: Logo, Hoşgeldin ve Profil */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
         <div style={{ 
           fontFamily: "var(--font-caveat)", 
-          fontSize: "1.5rem", 
+          fontSize: "1.3rem", 
           fontWeight: "bold",
           border: "2px solid var(--primary)",
           borderRadius: "50%",
-          width: "50px",
-          height: "50px",
+          width: "46px",
+          height: "46px",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -264,24 +264,27 @@ export default function CustomerHome() {
           lineHeight: 1,
           color: "var(--primary)"
         }}>
-          Jay's<br/><span style={{fontSize: "0.75rem"}}>Cafe</span>
+          Jay's<br/><span style={{fontSize: "0.7rem"}}>Cafe</span>
         </div>
+
+        <h1 className="font-caveat" style={{ 
+          fontSize: "1.75rem", 
+          textAlign: "center", 
+          lineHeight: 1.1, 
+          margin: "0",
+          color: "var(--text-primary)",
+          flex: 1
+        }}>
+          Hoş Geldin, {session?.user?.name}
+        </h1>
+
         <Link href="/dashboard/customer/profile" style={{ color: "var(--text-primary)" }}>
           <User size={28} strokeWidth={1.5} />
         </Link>
       </div>
 
-      {/* Başlık ve İllüstrasyon */}
+      {/* İllüstrasyon ve Butonlar */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-        <h1 className="font-caveat" style={{ 
-          fontSize: "2.5rem", 
-          textAlign: "center", 
-          lineHeight: 1.1, 
-          marginBottom: "1rem", // Reduced margin
-          color: "var(--text-primary)"
-        }}>
-          Hoş Geldin<br/>{session?.user?.name}
-        </h1>
 
         {/* 3D KÜP (SONSUZ DÖNGÜ) */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: "380px", margin: "0 auto 2rem auto", gap: "0.25rem" }}>
