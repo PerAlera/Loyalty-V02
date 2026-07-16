@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { User, Check, X, Gift, Coffee } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { QRCodeSVG } from "qrcode.react";
@@ -168,13 +169,7 @@ export default function CustomerHome() {
       alignItems: "center", justifyContent: "flex-start", padding: "0 0.5rem"
     }}>
       <div style={{ width: "120px", height: "160px", position: "relative", marginBottom: "2rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <div style={{ width: "100px", height: "130px", backgroundColor: "#E6D5C3", border: "4px solid #000", borderRadius: "10px 10px 30px 30px", position: "relative", display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <div style={{ width: "115px", height: "15px", backgroundColor: "#8C715A", border: "4px solid #000", borderRadius: "10px", position: "absolute", top: "-15px" }}></div>
-          <div style={{ width: "100px", height: "10px", backgroundColor: "#8C715A", border: "4px solid #000", borderBottom: "none", borderRadius: "10px 10px 0 0", position: "absolute", top: "-25px" }}></div>
-          <div style={{ width: "100%", height: "45px", backgroundColor: "#C29B73", borderTop: "4px solid #000", borderBottom: "4px solid #000", marginTop: "35px", display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <div style={{ color: "#EF4444", fontSize: "1.2rem" }}>❤️</div>
-          </div>
-        </div>
+        <Image src="/kahve.svg" alt="Kahve" width={120} height={160} style={{ objectFit: "contain" }} priority />
       </div>
       <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
@@ -210,14 +205,7 @@ export default function CustomerHome() {
       alignItems: "center", justifyContent: "flex-start", padding: "0 0.5rem"
     }}>
       <div style={{ width: "120px", height: "160px", position: "relative", marginBottom: "2rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <div style={{ width: "110px", height: "110px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "2px" }}>
-          <div style={{ width: "100%", height: "40px", backgroundColor: "#FBBF24", borderRadius: "50px 50px 10px 10px", border: "4px solid #000", position: "relative", display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <div style={{ color: "#EF4444", fontSize: "1rem", position: "absolute", top: "2px" }}>❤️</div>
-          </div>
-          <div style={{ width: "110%", height: "15px", backgroundColor: "#4ADE80", borderRadius: "10px", border: "4px solid #000" }}></div>
-          <div style={{ width: "95%", height: "25px", backgroundColor: "#78350F", borderRadius: "15px", border: "4px solid #000" }}></div>
-          <div style={{ width: "100%", height: "30px", backgroundColor: "#FBBF24", borderRadius: "10px 10px 30px 30px", border: "4px solid #000" }}></div>
-        </div>
+        <Image src="/yemek.svg" alt="Yemek" width={120} height={160} style={{ objectFit: "contain" }} priority />
       </div>
       <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
