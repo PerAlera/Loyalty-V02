@@ -18,6 +18,8 @@ model User {
   gender               String?
   email                String?
   profileRewardClaimed Boolean       @default(false)
+  acceptedTerms        Boolean       @default(false)
+  acceptedSms          Boolean       @default(false)
   createdAt            DateTime      @default(now())
   updatedAt            DateTime      @updatedAt
 

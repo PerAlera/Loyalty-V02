@@ -5,10 +5,14 @@ import bcrypt from "bcryptjs";
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { name, surname, phone, password, role } = body;
+    const { name, surname, phone, password, role, acceptedTerms, acceptedSms } = body;
 
     if (!name || !surname || !phone || !password) {
       return NextResponse.json({ error: "Eksik bilgi girdiniz." }, { status: 400 });
+    }
+    
+    if (acceptedTerms !== true) {
+      return NextResponse.json({ error: "Kullanıcı sözleşmesini onaylamanız gerekmektedir." }, { status: 400 });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -31,6 +35,8 @@ export async function POST(req: Request) {
         phone,
         passwordHash: hashedPassword,
         role: userRole,
+        acceptedTerms: true,
+        acceptedSms: acceptedSms === true,
         wallets: {
           create: { beans: 0, rewards: 0 }
         }

@@ -15,6 +15,8 @@ export default function RegisterPage() {
     phone: "",
     password: "",
   });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [acceptedSms, setAcceptedSms] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -24,10 +26,11 @@ export default function RegisterPage() {
     setError("");
 
     try {
+      const payload = { ...formData, acceptedTerms, acceptedSms };
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(payload),
       });
 
       const data = await res.json();
@@ -121,6 +124,33 @@ export default function RegisterPage() {
               onChange={handleChange}
               required
             />
+          </div>
+
+          <div className={styles.formGroup} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "1rem" }}>
+            <input 
+              type="checkbox" 
+              id="acceptedTerms" 
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              required
+              style={{ width: "1.2rem", height: "1.2rem", cursor: "pointer", accentColor: "var(--primary)" }}
+            />
+            <label htmlFor="acceptedTerms" style={{ fontSize: "0.85rem", color: "var(--text-secondary)", cursor: "pointer", userSelect: "none" }}>
+              Kullanıcı sözleşmesini ve KVKK aydınlatma metnini okudum, onaylıyorum. <span style={{ color: "var(--danger)" }}>*</span>
+            </label>
+          </div>
+
+          <div className={styles.formGroup} style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1rem" }}>
+            <input 
+              type="checkbox" 
+              id="acceptedSms" 
+              checked={acceptedSms}
+              onChange={(e) => setAcceptedSms(e.target.checked)}
+              style={{ width: "1.2rem", height: "1.2rem", cursor: "pointer", accentColor: "var(--primary)" }}
+            />
+            <label htmlFor="acceptedSms" style={{ fontSize: "0.85rem", color: "var(--text-secondary)", cursor: "pointer", userSelect: "none" }}>
+              Kampanya ve bilgilendirme SMS'leri almak istiyorum.
+            </label>
           </div>
 
           <button 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signOut, useSession } from "next-auth/react";
 import { QRCodeSVG } from "qrcode.react";
 
@@ -12,6 +12,31 @@ export default function CashierDashboard() {
   const [productType, setProductType] = useState<"COFFEE" | "FOOD">("COFFEE");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string, type: "success" | "error" } | null>(null);
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (token) {
+      interval = setInterval(async () => {
+        try {
+          const res = await fetch(`/api/cashier/qr/check?token=${token}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.isUsed) {
+              setToken(null);
+              setMessage({ text: "İşlem Başarılı! Müşteri QR Kodu Okuttu.", type: "success" });
+            }
+          }
+        } catch (error) {
+          console.error("QR Check Error", error);
+        }
+      }, 2000);
+    }
+
+    return () => {
+      if (interval) clearInterval(interval);
+    };
+  }, [token]);
 
   const generateToken = async (e: React.FormEvent) => {
     e.preventDefault();
