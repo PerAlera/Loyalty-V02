@@ -136,7 +136,7 @@ export default function RegisterPage() {
               style={{ width: "1.2rem", height: "1.2rem", cursor: "pointer", accentColor: "var(--primary)" }}
             />
             <label htmlFor="acceptedTerms" style={{ fontSize: "0.85rem", color: "var(--text-secondary)", cursor: "pointer", userSelect: "none" }}>
-              Kullanıcı sözleşmesini ve KVKK aydınlatma metnini okudum, onaylıyorum. <span style={{ color: "var(--danger)" }}>*</span>
+              <Link href="/kvkk" target="_blank" style={{ color: "var(--primary)", textDecoration: "underline" }}>Kullanıcı sözleşmesini ve KVKK aydınlatma metnini</Link> okudum, onaylıyorum. <span style={{ color: "var(--danger)" }}>*</span>
             </label>
           </div>
 
