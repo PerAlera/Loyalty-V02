@@ -14,17 +14,20 @@ export async function GET() {
     }
 
     const store = await prisma.store.findUnique({
-      where: { ownerId: session.user.id },
+      where: { id: session.user.storeId as string },
       include: {
-        cashiers: {
+        users: {
+          where: { role: "CASHIER" },
           select: { id: true, name: true, surname: true, phone: true, createdAt: true }
         }
       }
     });
 
-    if (!store) return NextResponse.json({ error: "Mağaza bulunamadı" }, { status: 404 });
+    if (!store) {
+      return NextResponse.json({ error: "Mağaza bulunamadı" }, { status: 404 });
+    }
 
-    return NextResponse.json({ cashiers: store.cashiers });
+    return NextResponse.json({ cashiers: store.users });
   } catch (error) {
     return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
@@ -46,7 +49,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Eksik bilgi" }, { status: 400 });
     }
 
-    const store = await prisma.store.findUnique({ where: { ownerId: session.user.id } });
+    const store = await prisma.store.findUnique({ where: { id: session.user.storeId as string } });
     if (!store) return NextResponse.json({ error: "Mağaza bulunamadı" }, { status: 404 });
 
     const existingUser = await prisma.user.findUnique({ where: { phone } });

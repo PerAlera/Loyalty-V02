@@ -12,7 +12,7 @@ export async function GET() {
     }
 
     const store = await prisma.store.findUnique({
-      where: { ownerId: session.user.id },
+      where: { id: session.user.storeId as string },
       include: { settings: true }
     });
 
@@ -41,7 +41,7 @@ export async function PUT(req: Request) {
       return NextResponse.json({ error: "Geçersiz değer" }, { status: 400 });
     }
 
-    const store = await prisma.store.findUnique({ where: { ownerId: session.user.id } });
+    const store = await prisma.store.findUnique({ where: { id: session.user.storeId as string } });
     if (!store) return NextResponse.json({ error: "Mağaza bulunamadı" }, { status: 404 });
 
     const updatedSettings = await prisma.storeSettings.update({

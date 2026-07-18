@@ -26,8 +26,7 @@ model User {
   wallets      Wallet[]
   transactions Transaction[] @relation("UserTransactions")
   qrTokens     QrToken[]
-  store        Store?        @relation("StoreOwner")
-  storeCashier Store?        @relation("StoreCashier", fields: [storeId], references: [id])
+  store        Store?        @relation("StoreUsers", fields: [storeId], references: [id])
   storeId      String?
 }
 
@@ -40,9 +39,7 @@ enum Role {
 model Store {
   id            String         @id @default(cuid())
   name          String
-  ownerId       String         @unique
-  owner         User           @relation("StoreOwner", fields: [ownerId], references: [id])
-  cashiers      User[]         @relation("StoreCashier")
+  users         User[]         @relation("StoreUsers")
   settings      StoreSettings?
   announcements Announcement[]
   createdAt     DateTime       @default(now())

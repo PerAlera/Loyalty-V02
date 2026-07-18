@@ -12,10 +12,10 @@ export async function GET() {
     }
 
     const store = await prisma.store.findUnique({
-      where: { ownerId: session.user.id },
+      where: { id: session.user.storeId as string },
       include: {
         _count: {
-          select: { cashiers: true }
+          select: { users: { where: { role: "CASHIER" } } }
         }
       }
     });
@@ -25,6 +25,7 @@ export async function GET() {
     }
 
     // --- SUMMARY STATS ---
+    const totalCashiers = store._count.users;
     const totalCustomers = await prisma.user.count({
       where: { role: "CUSTOMER" }
     });
@@ -258,7 +259,7 @@ export async function GET() {
 
     return NextResponse.json({
       storeName: store.name,
-      cashierCount: store._count.cashiers,
+      cashierCount: store._count.users,
       totalCustomers,
       totalRewards: totalRewardsData._sum.amount || 0,
       totalBeans: totalBeansData._sum.amount || 0,

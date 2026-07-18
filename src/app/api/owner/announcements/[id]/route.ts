@@ -13,7 +13,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
     const { id } = await params;
 
-    const store = await prisma.store.findUnique({ where: { ownerId: session.user.id } });
+    const store = await prisma.store.findUnique({ where: { id: session.user.storeId as string } });
     if (!store) return NextResponse.json({ error: "Mağaza bulunamadı" }, { status: 404 });
 
     const announcement = await prisma.announcement.findFirst({

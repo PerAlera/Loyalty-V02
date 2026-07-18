@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Başlık ve içerik gereklidir" }, { status: 400 });
     }
 
-    const store = await prisma.store.findUnique({ where: { ownerId: session.user.id } });
+    const store = await prisma.store.findUnique({ where: { id: session.user.storeId as string } });
     if (!store) return NextResponse.json({ error: "Mağaza bulunamadı" }, { status: 404 });
 
     const newAnnouncement = await prisma.announcement.create({
