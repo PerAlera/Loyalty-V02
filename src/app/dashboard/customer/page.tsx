@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useSession } from "next-auth/react";
-import { User, Check, X, Gift, Coffee } from "lucide-react";
+import { User, Check, X, Gift, Coffee, Utensils } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
@@ -25,7 +25,8 @@ export default function CustomerHome() {
   const [successMessage, setSuccessMessage] = useState("");
   const [redeemToken, setRedeemToken] = useState<string | null>(null);
   const [redeemType, setRedeemType] = useState<"COFFEE" | "FOOD" | null>(null);
-  const [rotation, setRotation] = useState(0);
+  const [activeTab, setActiveTab] = useState<"COFFEE" | "FOOD">("COFFEE");
+  const rotation = activeTab === "COFFEE" ? 0 : -90;
 
   // Polling ref
   const pollInterval = useRef<NodeJS.Timeout | null>(null);
@@ -276,11 +277,64 @@ export default function CustomerHome() {
       {/* İllüstrasyon ve Butonlar */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
 
-        {/* 3D KÜP (SONSUZ DÖNGÜ) */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: "380px", margin: "0 auto 2rem auto", gap: "0.25rem" }}>
-          <button onClick={() => setRotation(r => r + 90)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0.25rem" }}>
-            <span style={{ fontSize: "2rem", color: "var(--primary)" }}>{"<"}</span>
-          </button>
+        {/* SEKMELER (KAHVE / YEMEK) */}
+        <div style={{ display: "flex", gap: "1.5rem", marginBottom: "1rem" }}>
+          {/* Kahve Toggle */}
+          <div 
+            onClick={() => setActiveTab("COFFEE")}
+            style={{
+              position: "relative",
+              width: "60px",
+              height: "60px",
+              borderRadius: "50%",
+              backgroundColor: activeTab === "COFFEE" ? "var(--primary)" : "rgba(101, 67, 33, 0.1)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              boxShadow: activeTab === "COFFEE" ? "0 0 0 4px rgba(101, 67, 33, 0.2)" : "none",
+            }}
+          >
+            {activeTab === "COFFEE" && (
+              <div style={{
+                position: "absolute", top: "-10px", left: "-10px", right: "-10px", bottom: "-10px",
+                border: "2px dashed rgba(101, 67, 33, 0.4)", borderRadius: "50%", animation: "spin 10s linear infinite"
+              }}></div>
+            )}
+            <Coffee size={28} color={activeTab === "COFFEE" ? "white" : "var(--primary)"} strokeWidth={activeTab === "COFFEE" ? 2.5 : 2} />
+          </div>
+
+          {/* Yemek Toggle */}
+          <div 
+            onClick={() => setActiveTab("FOOD")}
+            style={{
+              position: "relative",
+              width: "60px",
+              height: "60px",
+              borderRadius: "50%",
+              backgroundColor: activeTab === "FOOD" ? "#F59E0B" : "rgba(245, 158, 11, 0.1)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              cursor: "pointer",
+              transition: "all 0.3s ease",
+              boxShadow: activeTab === "FOOD" ? "0 0 0 4px rgba(245, 158, 11, 0.2)" : "none",
+            }}
+          >
+            {activeTab === "FOOD" && (
+              <div style={{
+                position: "absolute", top: "-10px", left: "-10px", right: "-10px", bottom: "-10px",
+                border: "2px dashed rgba(245, 158, 11, 0.4)", borderRadius: "50%", animation: "spin 10s linear infinite"
+              }}></div>
+            )}
+            <Utensils size={28} color={activeTab === "FOOD" ? "white" : "#F59E0B"} strokeWidth={activeTab === "FOOD" ? 2.5 : 2} />
+          </div>
+        </div>
+
+        {/* 3D KÜP */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: "380px", margin: "0 auto 2rem auto" }}>
+
 
           <div style={{ perspective: "1000px", width: "260px", height: "360px", position: "relative" }}>
             <div style={{
@@ -309,10 +363,6 @@ export default function CustomerHome() {
               </div>
             </div>
           </div>
-
-          <button onClick={() => setRotation(r => r - 90)} style={{ background: "none", border: "none", cursor: "pointer", padding: "0.25rem" }}>
-            <span style={{ fontSize: "2rem", color: "var(--primary)" }}>{">"}</span>
-          </button>
         </div>
 
         {/* Butonlar */}
@@ -531,6 +581,9 @@ export default function CustomerHome() {
         @keyframes bounce {
           0%, 100% { transform: translateY(0); }
           50% { transform: translateY(-5px); }
+        }
+        @keyframes spin {
+          100% { transform: rotate(360deg); }
         }
       `}} />
     </div>
