@@ -169,8 +169,8 @@ export default function CustomerHome() {
       width: "100%", height: "100%", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "flex-start", padding: "0 0.5rem"
     }}>
-      <div style={{ width: "240px", height: "280px", position: "relative", marginBottom: "1rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Image src="/kahve.svg" alt="Kahve" width={240} height={280} style={{ objectFit: "contain" }} priority />
+      <div style={{ width: "240px", height: "260px", position: "relative", marginBottom: "0.25rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Image src="/kahve.svg" alt="Kahve" width={240} height={260} style={{ objectFit: "contain" }} priority />
       </div>
       <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
@@ -205,8 +205,8 @@ export default function CustomerHome() {
       width: "100%", height: "100%", display: "flex", flexDirection: "column",
       alignItems: "center", justifyContent: "flex-start", padding: "0 0.5rem"
     }}>
-      <div style={{ width: "240px", height: "280px", position: "relative", marginBottom: "1rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <Image src="/yemek.svg" alt="Yemek" width={240} height={280} style={{ objectFit: "contain" }} priority />
+      <div style={{ width: "240px", height: "260px", position: "relative", marginBottom: "0.25rem", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <Image src="/yemek.svg" alt="Yemek" width={240} height={260} style={{ objectFit: "contain" }} priority />
       </div>
       <div style={{ width: "100%" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
@@ -241,7 +241,7 @@ export default function CustomerHome() {
       minHeight: "100dvh", 
       display: "flex", 
       flexDirection: "column",
-      padding: "1.5rem 1rem", 
+      padding: "1rem 1rem", 
       backgroundColor: "var(--bg-primary)",
       position: "relative",
       overflowX: "hidden",
@@ -249,10 +249,10 @@ export default function CustomerHome() {
     }}>
       
       {/* Üst Bar: Logo, Hoşgeldin ve Profil */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem" }}>
         <div style={{ 
-          width: "75px",
-          height: "75px",
+          width: "60px",
+          height: "60px",
           position: "relative"
         }}>
           <Image src="/logo.svg" alt="Jay's Cafe Logo" fill style={{ objectFit: "contain" }} priority />
@@ -278,7 +278,7 @@ export default function CustomerHome() {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
 
         {/* SEKMELER (KAHVE / YEMEK) */}
-        <div style={{ display: "flex", gap: "1.5rem", marginBottom: "1rem" }}>
+        <div style={{ display: "flex", gap: "1rem", marginBottom: "0.5rem" }}>
           {/* Kahve Toggle */}
           <div 
             onClick={() => setActiveTab("COFFEE")}
@@ -333,10 +333,9 @@ export default function CustomerHome() {
         </div>
 
         {/* 3D KÜP */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: "380px", margin: "0 auto 2rem auto" }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "100%", maxWidth: "380px", margin: "0 auto 0.75rem auto" }}>
 
-
-          <div style={{ perspective: "1000px", width: "260px", height: "360px", position: "relative" }}>
+          <div style={{ perspective: "1000px", width: "260px", height: "320px", position: "relative" }}>
             <div style={{
               position: "absolute",
               width: "100%",
@@ -346,19 +345,19 @@ export default function CustomerHome() {
               transform: `translateZ(-130px) rotateY(${rotation}deg)`
             }}>
               {/* Ön Yüz (0 deg) - Kahve */}
-              <div style={{ position: "absolute", width: "260px", height: "360px", backfaceVisibility: "hidden", transform: "rotateY(0deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
+              <div style={{ position: "absolute", width: "260px", height: "320px", backfaceVisibility: "hidden", transform: "rotateY(0deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
                 {renderCoffeeFace()}
               </div>
               {/* Sağ Yüz (90 deg) - Yemek */}
-              <div style={{ position: "absolute", width: "260px", height: "360px", backfaceVisibility: "hidden", transform: "rotateY(90deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
+              <div style={{ position: "absolute", width: "260px", height: "320px", backfaceVisibility: "hidden", transform: "rotateY(90deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
                 {renderFoodFace()}
               </div>
               {/* Arka Yüz (180 deg) - Kahve */}
-              <div style={{ position: "absolute", width: "260px", height: "360px", backfaceVisibility: "hidden", transform: "rotateY(180deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
+              <div style={{ position: "absolute", width: "260px", height: "320px", backfaceVisibility: "hidden", transform: "rotateY(180deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
                 {renderCoffeeFace()}
               </div>
               {/* Sol Yüz (-90 deg) - Yemek */}
-              <div style={{ position: "absolute", width: "260px", height: "360px", backfaceVisibility: "hidden", transform: "rotateY(-90deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
+              <div style={{ position: "absolute", width: "260px", height: "320px", backfaceVisibility: "hidden", transform: "rotateY(-90deg) translateZ(130px)", backgroundColor: "var(--bg-primary)" }}>
                 {renderFoodFace()}
               </div>
             </div>
@@ -366,13 +365,13 @@ export default function CustomerHome() {
         </div>
 
         {/* Butonlar */}
-        <div style={{ width: "100%", maxWidth: "300px", display: "flex", flexDirection: "column", gap: "1rem" }}>
+        <div style={{ width: "100%", maxWidth: "300px", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
           
           <button 
             className="btn-primary" 
             onClick={() => openModal("SCAN")}
             style={{ 
-              padding: "1rem", 
+              padding: "0.75rem", 
               fontSize: "1.2rem", 
               boxShadow: "0 4px 14px rgba(101, 67, 33, 0.4)",
               lineHeight: 1.2
@@ -381,7 +380,7 @@ export default function CustomerHome() {
             Qr Okut<br/>Kazan
           </button>
 
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.5rem" }}>
             
             {/* Kahve Ödül Butonu */}
             <div style={{ position: "relative", width: "100%" }}>
