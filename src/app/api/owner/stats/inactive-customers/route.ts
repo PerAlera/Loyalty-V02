@@ -24,7 +24,6 @@ export async function GET(request: Request) {
     // Fetch all customers for the business with their most recent transaction
     const users = await prisma.user.findMany({
       where: { 
-        storeId: storeId, 
         role: "CUSTOMER" 
       },
       select: {

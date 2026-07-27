@@ -45,7 +45,6 @@ export async function GET(request: Request) {
 
     const todayTransactions = await prisma.transaction.findMany({
       where: { 
-        user: { storeId: session.user.storeId as string },
         createdAt: { 
           gte: todayUTCStart,
           lte: todayUTCEnd

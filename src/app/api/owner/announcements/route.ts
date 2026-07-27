@@ -52,14 +52,11 @@ export async function POST(req: Request) {
       let subscriptions: any[] = [];
       
       if (target === "all") {
-        subscriptions = await prisma.pushSubscription.findMany({
-          where: { user: { storeId: store.id } }
-        });
+        subscriptions = await prisma.pushSubscription.findMany();
       } else if (target === "selected" && selectedUserIds && selectedUserIds.length > 0) {
         subscriptions = await prisma.pushSubscription.findMany({
           where: { 
-            userId: { in: selectedUserIds },
-            user: { storeId: store.id }
+            userId: { in: selectedUserIds }
           }
         });
       }

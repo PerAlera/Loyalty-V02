@@ -15,7 +15,6 @@ export async function GET(req: Request) {
 
     const customers = await prisma.user.findMany({
       where: {
-        storeId: storeId,
         role: "CUSTOMER"
       },
       select: {
