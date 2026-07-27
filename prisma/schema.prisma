@@ -26,6 +26,8 @@ model User {
   wallets      Wallet[]
   transactions Transaction[] @relation("UserTransactions")
   qrTokens     QrToken[]
+  pushSubscriptions PushSubscription[]
+  targetedAnnouncements Announcement[] @relation("AnnouncementToUser")
   store        Store?        @relation("StoreUsers", fields: [storeId], references: [id])
   storeId      String?
 }
@@ -52,6 +54,9 @@ model Announcement {
   content   String
   storeId   String
   store     Store    @relation(fields: [storeId], references: [id], onDelete: Cascade)
+  isGlobal  Boolean  @default(true)
+  isPush    Boolean  @default(false)
+  users     User[]   @relation("AnnouncementToUser")
   createdAt DateTime @default(now())
 }
 
@@ -118,4 +123,14 @@ enum QrType {
 enum ProductType {
   COFFEE
   FOOD
+}
+
+model PushSubscription {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  endpoint   String   @unique
+  p256dh     String
+  auth       String
+  createdAt  DateTime @default(now())
 }

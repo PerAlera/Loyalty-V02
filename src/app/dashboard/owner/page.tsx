@@ -2,17 +2,27 @@
 
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
-import { Users, Gift, Coffee, Calendar, Clock, Activity, PieChart as PieChartIcon, BarChart2, TrendingUp, Sun } from "lucide-react";
+import { Users, Gift, Coffee, Calendar, Clock, Activity, PieChart as PieChartIcon, BarChart2, TrendingUp, Sun, UserMinus } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from "recharts";
 
 export default function OwnerDashboard() {
   const { data: session } = useSession();
   const [stats, setStats] = useState<any>(null);
   
+  // Daily Chart State
+  const [dayOffset, setDayOffset] = useState(0);
+  const [dailyStats, setDailyStats] = useState<any>(null);
+  const [loadingDaily, setLoadingDaily] = useState(true);
+  
   // Weekly Chart State
   const [weekOffset, setWeekOffset] = useState(0);
   const [weeklyStats, setWeeklyStats] = useState<any>(null);
   const [loadingWeekly, setLoadingWeekly] = useState(true);
+
+  // Inactive Customers State
+  const [inactiveWeeks, setInactiveWeeks] = useState(1);
+  const [inactiveCustomers, setInactiveCustomers] = useState<any[]>([]);
+  const [loadingInactive, setLoadingInactive] = useState(true);
 
   const [loading, setLoading] = useState(true);
 
@@ -21,8 +31,16 @@ export default function OwnerDashboard() {
   }, []);
 
   useEffect(() => {
+    fetchDailyData(dayOffset);
+  }, [dayOffset]);
+
+  useEffect(() => {
     fetchWeeklyData(weekOffset);
   }, [weekOffset]);
+
+  useEffect(() => {
+    fetchInactiveCustomers(inactiveWeeks);
+  }, [inactiveWeeks]);
 
   const fetchData = async () => {
     try {
@@ -32,6 +50,17 @@ export default function OwnerDashboard() {
       console.error(e);
     }
     setLoading(false);
+  };
+
+  const fetchDailyData = async (offset: number) => {
+    setLoadingDaily(true);
+    try {
+      const res = await fetch(`/api/owner/stats/daily?offset=${offset}`);
+      if (res.ok) setDailyStats(await res.json());
+    } catch (e) {
+      console.error(e);
+    }
+    setLoadingDaily(false);
   };
 
   const fetchWeeklyData = async (offset: number) => {
@@ -45,6 +74,20 @@ export default function OwnerDashboard() {
     setLoadingWeekly(false);
   };
 
+  const fetchInactiveCustomers = async (weeksAgo: number) => {
+    setLoadingInactive(true);
+    try {
+      const res = await fetch(`/api/owner/stats/inactive-customers?weeksAgo=${weeksAgo}`);
+      if (res.ok) {
+        const data = await res.json();
+        setInactiveCustomers(data.inactiveCustomers || []);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+    setLoadingInactive(false);
+  };
+
   if (loading) return <div style={{ padding: "3rem", textAlign: "center" }}>Yükleniyor...</div>;
 
   const COLORS = ['#654321', '#C29B73', '#E6D5C3', '#000000'];
@@ -55,31 +98,53 @@ export default function OwnerDashboard() {
         <h1 style={{ color: "var(--text-primary)", fontSize: "1.5rem", fontWeight: "bold", margin: 0 }}>Admin Paneli</h1>
       </div>
 
-      {/* 1. BUGÜNÜN ÖZETİ */}
-      <h2 style={{ fontSize: "1.25rem", marginBottom: "1rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-        <Sun size={20} color="var(--primary)" /> Bugünün Özeti
-      </h2>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
+      {/* 1. GÜNLÜK ÖZET */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", flexWrap: "wrap", gap: "1rem" }}>
+        <h2 style={{ fontSize: "1.25rem", margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <Sun size={20} color="var(--primary)" /> Günlük Özet
+        </h2>
+        
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", backgroundColor: "var(--bg-primary)", padding: "0.25rem 0.5rem", borderRadius: "2rem", border: "1px solid var(--border-color)" }}>
+          <button 
+            onClick={() => setDayOffset(prev => prev - 1)}
+            style={{ background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", padding: "0.25rem", color: "var(--text-secondary)" }}
+          >
+            <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>{"<"}</span>
+          </button>
+          <span style={{ fontSize: "0.875rem", fontWeight: "bold", minWidth: "100px", textAlign: "center" }}>
+            {loadingDaily ? "Yükleniyor..." : dailyStats?.dayLabel || "Veri Yok"}
+          </span>
+          <button 
+            onClick={() => setDayOffset(prev => prev + 1)}
+            disabled={dayOffset >= 0}
+            style={{ background: "none", border: "none", cursor: dayOffset >= 0 ? "not-allowed" : "pointer", display: "flex", alignItems: "center", padding: "0.25rem", color: dayOffset >= 0 ? "var(--border-color)" : "var(--text-secondary)" }}
+          >
+            <span style={{ fontSize: "1.2rem", lineHeight: 1 }}>{">"}</span>
+          </button>
+        </div>
+      </div>
+      
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1rem", marginBottom: "2rem", opacity: loadingDaily ? 0.5 : 1, transition: "opacity 0.2s" }}>
         
         <div className="surface-card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem", borderLeft: "4px solid var(--primary)", backgroundColor: "rgba(101, 67, 33, 0.05)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-secondary)" }}>
             <Coffee size={20} /> <span style={{ fontSize: "0.875rem" }}>Dağıtılan Kahve Puanı</span>
           </div>
-          <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "var(--primary)" }}>{stats?.todayBeans || 0}</div>
+          <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "var(--primary)" }}>{dailyStats?.beans || 0}</div>
         </div>
 
         <div className="surface-card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem", borderLeft: "4px solid #F59E0B", backgroundColor: "rgba(245, 158, 11, 0.05)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-secondary)" }}>
             <Gift size={20} /> <span style={{ fontSize: "0.875rem" }}>Dağıtılan Yemek Puanı</span>
           </div>
-          <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#F59E0B" }}>{stats?.todayFoodPoints || 0}</div>
+          <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "#F59E0B" }}>{dailyStats?.foodPoints || 0}</div>
         </div>
 
         <div className="surface-card" style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem", borderLeft: "4px solid var(--success)", backgroundColor: "rgba(34, 197, 94, 0.05)" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", color: "var(--text-secondary)" }}>
-            <Users size={20} /> <span style={{ fontSize: "0.875rem" }}>Bugünkü Tekil Ziyaretçi</span>
+            <Users size={20} /> <span style={{ fontSize: "0.875rem" }}>Tekil Ziyaretçi</span>
           </div>
-          <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "var(--success)" }}>{stats?.todayUniqueCustomers || 0}</div>
+          <div style={{ fontSize: "2.5rem", fontWeight: "bold", color: "var(--success)" }}>{dailyStats?.uniqueCustomers || 0}</div>
         </div>
 
       </div>
@@ -134,15 +199,15 @@ export default function OwnerDashboard() {
 
       {/* 3. GRAFİKLER BÖLÜMÜ */}
       
-      {/* 3.A Bugün Saatlik Yoğunluk */}
+      {/* 3.A Günlük Saatlik Yoğunluk */}
       <div className="surface-card" style={{ padding: "1.5rem", marginBottom: "2rem" }}>
         <h2 style={{ fontSize: "1.25rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-          <Activity size={24} color="var(--primary)"/> Bugünün Saatlik Yoğunluk Trendi
+          <Activity size={24} color="var(--primary)"/> {dailyStats?.dayLabel || "Günlük"} Saatlik Yoğunluk Trendi
         </h2>
-        <div style={{ width: '100%', height: 300 }}>
-          {stats?.todayHourlyData && stats.todayHourlyData.length > 0 ? (
+        <div style={{ width: '100%', height: 300, opacity: loadingDaily ? 0.5 : 1, transition: "opacity 0.2s" }}>
+          {dailyStats?.hourlyData && dailyStats.hourlyData.length > 0 ? (
             <ResponsiveContainer>
-              <LineChart data={stats.todayHourlyData} margin={{ top: 5, right: 20, bottom: 5, left: -20 }}>
+              <LineChart data={dailyStats.hourlyData} margin={{ top: 5, right: 20, bottom: 5, left: -20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                 <XAxis dataKey="hour" axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
                 <YAxis allowDecimals={false} axisLine={false} tickLine={false} tick={{ fontSize: 12 }} />
@@ -152,7 +217,7 @@ export default function OwnerDashboard() {
             </ResponsiveContainer>
           ) : (
             <div style={{ height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-secondary)" }}>
-              Bugün henüz işlem yok.
+              Bu güne ait işlem yok.
             </div>
           )}
         </div>
@@ -295,6 +360,72 @@ export default function OwnerDashboard() {
           )}
         </div>
 
+      </div>
+
+      {/* 4. İNAKTİF MÜŞTERİ ANALİZİ */}
+      <div className="surface-card" style={{ padding: "1.5rem", marginTop: "2rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.5rem", flexWrap: "wrap", gap: "1rem" }}>
+          <h2 style={{ fontSize: "1.25rem", margin: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <UserMinus size={24} color="var(--danger)"/> İnaktif Müşteri Analizi
+          </h2>
+          
+          <select 
+            value={inactiveWeeks} 
+            onChange={(e) => setInactiveWeeks(Number(e.target.value))}
+            style={{ 
+              padding: "0.5rem 1rem", 
+              borderRadius: "0.5rem", 
+              border: "1px solid var(--border-color)",
+              backgroundColor: "var(--bg-primary)",
+              color: "var(--text-primary)",
+              outline: "none",
+              cursor: "pointer"
+            }}
+          >
+            <option value={1}>Son 1 Haftadır Gelmeyenler</option>
+            <option value={2}>Son 2 Haftadır Gelmeyenler</option>
+            <option value={3}>Son 3 Haftadır Gelmeyenler</option>
+            <option value={4}>Son 1 Aydır Gelmeyenler</option>
+          </select>
+        </div>
+
+        {loadingInactive ? (
+          <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-secondary)" }}>Veriler yükleniyor...</div>
+        ) : inactiveCustomers.length > 0 ? (
+          <div style={{ overflowX: "auto" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse", textAlign: "left" }}>
+              <thead>
+                <tr style={{ borderBottom: "2px solid var(--border-color)", color: "var(--text-secondary)" }}>
+                  <th style={{ padding: "1rem" }}>Müşteri Adı</th>
+                  <th style={{ padding: "1rem" }}>Telefon</th>
+                  <th style={{ padding: "1rem" }}>Son Ziyaret</th>
+                  <th style={{ padding: "1rem" }}>Geçen Süre</th>
+                </tr>
+              </thead>
+              <tbody>
+                {inactiveCustomers.map((user: any) => {
+                  const lastVisitDate = new Date(user.lastVisit);
+                  const now = new Date();
+                  const diffTime = Math.abs(now.getTime() - lastVisitDate.getTime());
+                  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                  return (
+                    <tr key={user.id} style={{ borderBottom: "1px solid var(--border-color)" }}>
+                      <td style={{ padding: "1rem", fontWeight: "500" }}>{user.name} {user.surname}</td>
+                      <td style={{ padding: "1rem" }}>{user.phone}</td>
+                      <td style={{ padding: "1rem" }}>{lastVisitDate.toLocaleDateString('tr-TR')}</td>
+                      <td style={{ padding: "1rem", color: "var(--danger)", fontWeight: "bold" }}>{diffDays} gün önce</td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div style={{ padding: "2rem", textAlign: "center", backgroundColor: "rgba(34, 197, 94, 0.05)", color: "var(--success)", borderRadius: "0.5rem", border: "1px solid var(--success)" }}>
+            Harika! Bu kritere uyan inaktif müşteri bulunmuyor.
+          </div>
+        )}
       </div>
 
     </div>
