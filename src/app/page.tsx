@@ -23,14 +23,6 @@ export default function Home() {
     }
   }, [status, session, router]);
 
-  if (status === "loading") {
-    return (
-      <main className={styles.main}>
-        <div style={{ color: "var(--text-secondary)" }}>Yükleniyor...</div>
-      </main>
-    );
-  }
-
   // Sadece giriş yapmamış kullanıcılara anasayfayı göster. Giriş yapanlar useEffect ile yönlendirilecek.
   if (status === "authenticated") {
     return (
