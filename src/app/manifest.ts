@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Jays',
     short_name: 'Jays',
     description: 'Jays Dijital Sadakat Uygulaması',
-    start_url: '/login',
+    start_url: '/',
     display: 'standalone',
     background_color: '#FBF8F1',
     theme_color: '#654321',
