@@ -7,8 +7,8 @@ import webPush from "web-push";
 if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   webPush.setVapidDetails(
     "mailto:alperen@peralera.com",
-    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
+    process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY.replace(/["']/g, "").trim(),
+    process.env.VAPID_PRIVATE_KEY.replace(/["']/g, "").trim()
   );
 }
 

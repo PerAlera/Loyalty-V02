@@ -11,10 +11,9 @@ export async function GET() {
     
     if (session && session.user) {
       if (session.user.role === "OWNER") {
-        whereClause = { storeId: session.user.storeId };
+        whereClause = {};
       } else {
         whereClause = {
-          storeId: session.user.storeId,
           OR: [
             { isGlobal: true },
             { users: { some: { id: session.user.id } } }
