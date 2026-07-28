@@ -51,7 +51,7 @@ export default function CustomerHome() {
       await navigator.serviceWorker.ready;
       const existingSub = await registration.pushManager.getSubscription();
       
-      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.replace(/["'=`]/g, "").trim();
       if (!vapidKey) return;
       
       const urlB64ToUint8Array = (base64String: string) => {
@@ -90,7 +90,7 @@ export default function CustomerHome() {
         const registration = await navigator.serviceWorker.register('/api/sw.js', { scope: '/' });
         await navigator.serviceWorker.ready;
         
-        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.replace(/["'=`]/g, "").trim();
         if (!vapidKey) {
           alert("Hata: VAPID Key bulunamadı!");
           return;
