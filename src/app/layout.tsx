@@ -2,8 +2,9 @@ import "./globals.css";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Loyalty App - Dijital Sadakat Sistemi",
-  description: "Modern, hızlı ve premium dijital sadakat sistemi.",
+  title: "Jays",
+  description: "Jays Dijital Sadakat Uygulaması",
+  manifest: "/manifest.webmanifest",
 };
 
 import { Inter, Caveat } from "next/font/google";
