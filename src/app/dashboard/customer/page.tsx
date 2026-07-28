@@ -51,13 +51,12 @@ export default function CustomerHome() {
       await navigator.serviceWorker.ready;
       const existingSub = await registration.pushManager.getSubscription();
       
-      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.replace(/["'=`]/g, "").trim();
+      const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
       if (!vapidKey) return;
       
       const urlB64ToUint8Array = (base64String: string) => {
-        const cleanString = base64String.replace(/[^a-zA-Z0-9\-_+/]/g, "");
-        const padding = '='.repeat((4 - cleanString.length % 4) % 4);
-        const base64 = (cleanString + padding).replace(/\-/g, '+').replace(/_/g, '/');
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
         const rawData = window.atob(base64);
         const outputArray = new Uint8Array(rawData.length);
         for (let i = 0; i < rawData.length; ++i) {
@@ -91,16 +90,15 @@ export default function CustomerHome() {
         const registration = await navigator.serviceWorker.register('/api/sw.js', { scope: '/' });
         await navigator.serviceWorker.ready;
         
-        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY?.replace(/["'=`]/g, "").trim();
+        const vapidKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
         if (!vapidKey) {
           alert("Hata: VAPID Key bulunamadı!");
           return;
         }
         
         const urlB64ToUint8Array = (base64String: string) => {
-          const cleanString = base64String.replace(/[^a-zA-Z0-9\-_+/]/g, "");
-          const padding = '='.repeat((4 - cleanString.length % 4) % 4);
-          const base64 = (cleanString + padding).replace(/\-/g, '+').replace(/_/g, '/');
+          const padding = '='.repeat((4 - base64String.length % 4) % 4);
+          const base64 = (base64String + padding).replace(/\-/g, '+').replace(/_/g, '/');
           const rawData = window.atob(base64);
           const outputArray = new Uint8Array(rawData.length);
           for (let i = 0; i < rawData.length; ++i) {

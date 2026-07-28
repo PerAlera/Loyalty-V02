@@ -6,12 +6,10 @@ import webPush from "web-push";
 
 if (process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   try {
-    const cleanKey = (key: string) => key.replace(/["'=`]/g, "").replace(/\+/g, "-").replace(/\//g, "_").trim();
-    
     webPush.setVapidDetails(
       "mailto:alperen@peralera.com",
-      cleanKey(process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY),
-      cleanKey(process.env.VAPID_PRIVATE_KEY)
+      process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY,
+      process.env.VAPID_PRIVATE_KEY
     );
   } catch (error) {
     console.warn("VAPID configuration failed (this is non-fatal for the build):", error);
