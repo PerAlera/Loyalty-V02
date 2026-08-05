@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { signIn, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -15,9 +15,20 @@ export default function LoginPage() {
   const { status } = useSession();
   const [loading, setLoading] = useState(false);
 
-  if (status === "authenticated") {
-    router.push("/");
-    return null;
+  useEffect(() => {
+    if (status === "authenticated") {
+      router.push("/");
+    }
+  }, [status, router]);
+
+  if (status === "authenticated" || status === "loading") {
+    return (
+      <div className={styles.authContainer}>
+        <div style={{ color: "var(--text-secondary)", textAlign: "center", padding: "2rem" }}>
+          {status === "loading" ? "Yükleniyor..." : "Yönlendiriliyor..."}
+        </div>
+      </div>
+    );
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,6 +99,7 @@ export default function LoginPage() {
         </form>
 
         <div className={styles.authLink}>
+          <Link href="/forgot-password" style={{ display: "block", marginBottom: "0.5rem" }}>Şifremi Unuttum</Link>
           Hesabınız yok mu? <Link href="/register">Kayıt Ol</Link>
         </div>
       </div>

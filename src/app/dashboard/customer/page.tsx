@@ -23,6 +23,7 @@ export default function CustomerHome() {
   const [pushPermission, setPushPermission] = useState<NotificationPermission | "default">("default");
   const [isSubscribing, setIsSubscribing] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [profileReward, setProfileReward] = useState<{ enabled: boolean, amount: number, claimed: boolean } | null>(null);
   // Modal states
   const [modalType, setModalType] = useState<ModalType>("NONE");
   const [successMessage, setSuccessMessage] = useState("");
@@ -134,11 +135,17 @@ export default function CustomerHome() {
         fetch("/api/customer/wallet"),
         fetch("/api/announcements")
       ]);
+      let wData: any = null;
       if (walletRes.ok) {
-        const data = await walletRes.json();
-        setWallet(data.wallet);
-        if (data.requiredCoffees) setRequiredCoffees(data.requiredCoffees);
-        if (data.requiredFoods) setRequiredFoods(data.requiredFoods);
+        wData = await walletRes.json();
+        setWallet(wData.wallet);
+        if (wData.requiredCoffees) setRequiredCoffees(wData.requiredCoffees);
+        if (wData.requiredFoods) setRequiredFoods(wData.requiredFoods);
+        setProfileReward({
+          enabled: wData.profileRewardEnabled,
+          amount: wData.profileRewardAmount,
+          claimed: wData.profileRewardClaimed
+        });
       }
       if (announcementsRes.ok) {
         const data = await announcementsRes.json();
@@ -157,7 +164,14 @@ export default function CustomerHome() {
         setCampaigns(camps);
         setNotifications(notifs);
         
-        const unread = notifs.filter((n: any) => !readIds.includes(n.id)).length;
+        let unread = notifs.filter((n: any) => !readIds.includes(n.id)).length;
+        
+        if (wData) {
+          if (wData.profileRewardEnabled && !wData.profileRewardClaimed) {
+             unread += 1;
+          }
+        }
+
         setUnreadCount(unread);
       }
     } catch (e) {
@@ -188,7 +202,7 @@ export default function CustomerHome() {
 
   const openNotifications = () => {
     setModalType("NOTIFICATIONS");
-    setUnreadCount(0);
+    setUnreadCount(prev => prev > 0 ? (profileReward?.enabled && !profileReward?.claimed ? 1 : 0) : 0);
     if (typeof window !== "undefined") {
       const readIds = notifications.map(n => n.id);
       localStorage.setItem("readNotifications", JSON.stringify(readIds));
@@ -715,6 +729,24 @@ export default function CustomerHome() {
                       style={{ padding: "0.5rem", backgroundColor: "#10B981", color: "white", border: "none", borderRadius: "0.5rem", fontWeight: "bold", cursor: "pointer", fontSize: "0.85rem", marginTop: "0.5rem" }}
                     >
                       {isSubscribing ? "Açılıyor..." : "İzin Ver"}
+                    </button>
+                  </div>
+                )}
+
+                {(profileReward?.enabled && !profileReward?.claimed) && (
+                  <div style={{ position: "relative", padding: "0.75rem", border: "1px solid var(--primary)", backgroundColor: "rgba(217, 119, 6, 0.1)", borderRadius: "0.75rem", textAlign: "left", marginBottom: "0.75rem" }}>
+                    <h3 style={{ fontSize: "0.95rem", marginBottom: "0.25rem", color: "var(--primary)" }}>Profilini Tamamla, Kazan! 🎁</h3>
+                    <p style={{ fontSize: "0.8rem", color: "var(--text-secondary)", marginBottom: "0.5rem" }}>
+                      Doğum tarihi ve cinsiyet bilgilerini kaydet, anında <strong>{profileReward.amount} Kahve Çekirdeği</strong> hediye kazan.
+                    </p>
+                    <button
+                      onClick={() => {
+                        closeModal();
+                        router.push("/dashboard/customer/profile");
+                      }}
+                      style={{ padding: "0.4rem 0.8rem", backgroundColor: "var(--primary)", color: "white", border: "none", borderRadius: "0.5rem", fontSize: "0.8rem", cursor: "pointer", fontWeight: "bold" }}
+                    >
+                      Profili Tamamla
                     </button>
                   </div>
                 )}

@@ -15,6 +15,12 @@ export async function GET() {
       where: { userId: session.user.id }
     });
 
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { profileRewardClaimed: true }
+    });
+    const profileRewardClaimed = user?.profileRewardClaimed || false;
+
     if (!wallet) {
       wallet = await prisma.wallet.create({
         data: { userId: session.user.id, beans: 0, rewards: 0 }
@@ -29,7 +35,7 @@ export async function GET() {
     const profileRewardEnabled = storeSettings?.profileRewardEnabled || false;
     const profileRewardAmount = storeSettings?.profileRewardAmount || 1;
 
-    return NextResponse.json({ wallet, requiredCoffees, requiredFoods, profileRewardEnabled, profileRewardAmount });
+    return NextResponse.json({ wallet, requiredCoffees, requiredFoods, profileRewardEnabled, profileRewardAmount, profileRewardClaimed });
   } catch (error) {
     return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }

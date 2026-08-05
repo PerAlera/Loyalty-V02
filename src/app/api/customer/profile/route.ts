@@ -83,14 +83,23 @@ export async function PUT(req: Request) {
     if (rewardGranted && storeSettings?.profileRewardAmount) {
       // Grant reward
       const wallet = await prisma.wallet.findUnique({ where: { userId: user.id } });
+      let newBeans = wallet ? wallet.beans + storeSettings.profileRewardAmount : storeSettings.profileRewardAmount;
+      let newRewards = wallet ? wallet.rewards : 0;
+      const requiredCoffees = storeSettings.requiredCoffees || 10;
+
+      while (newBeans >= requiredCoffees) {
+        newBeans -= requiredCoffees;
+        newRewards += 1;
+      }
+
       if (wallet) {
         await prisma.wallet.update({
           where: { userId: user.id },
-          data: { beans: { increment: storeSettings.profileRewardAmount } }
+          data: { beans: newBeans, rewards: newRewards }
         });
       } else {
         await prisma.wallet.create({
-          data: { userId: user.id, beans: storeSettings.profileRewardAmount, rewards: 0 }
+          data: { userId: user.id, beans: newBeans, rewards: newRewards }
         });
       }
 

@@ -135,15 +135,7 @@ export default function ProfilePage() {
         <p style={{ color: "var(--text-secondary)" }}>Müşteri Hesabı</p>
       </div>
 
-      {/* Profil Ödülü Banner */}
-      {rewardSettings.enabled && profileData && !profileData.profileRewardClaimed && (
-        <div style={{ backgroundColor: "rgba(217, 119, 6, 0.1)", border: "1px solid var(--primary)", borderRadius: "1rem", padding: "1rem", marginBottom: "2rem", textAlign: "center" }}>
-          <h3 style={{ color: "var(--primary)", margin: "0 0 0.5rem 0", fontSize: "1.1rem" }}>Profilini Tamamla, Kazan! 🎁</h3>
-          <p style={{ color: "var(--text-secondary)", fontSize: "0.9rem", margin: 0 }}>
-            Doğum tarihi ve cinsiyet bilgilerini kaydet, anında <strong>{rewardSettings.amount} Kahve Çekirdeği</strong> hediye kazan.
-          </p>
-        </div>
-      )}
+
 
       {/* Cüzdan Özeti */}
       <div className="surface-card" style={{ marginBottom: "2rem", padding: "1.5rem", display: "flex", justifyContent: "space-between", alignItems: "center", border: "2px solid var(--primary)" }}>
