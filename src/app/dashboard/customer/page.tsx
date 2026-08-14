@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 import { Scanner } from "@yudiel/react-qr-scanner";
 import { QRCodeSVG } from "qrcode.react";
 
-type ModalType = "NONE" | "SCAN" | "REDEEM" | "CAMPAIGNS" | "SUCCESS" | "NOTIFICATIONS";
+type ModalType = "NONE" | "SCAN" | "REDEEM" | "CAMPAIGNS" | "SUCCESS" | "SUCCESS_WITH_SURVEY" | "NOTIFICATIONS";
 
 export default function CustomerHome() {
   const { data: session } = useSession();
@@ -27,6 +27,7 @@ export default function CustomerHome() {
   // Modal states
   const [modalType, setModalType] = useState<ModalType>("NONE");
   const [successMessage, setSuccessMessage] = useState("");
+  const [isNewUser, setIsNewUser] = useState(false);
   const [redeemToken, setRedeemToken] = useState<string | null>(null);
   const [redeemType, setRedeemType] = useState<"COFFEE" | "FOOD" | null>(null);
   const [activeTab, setActiveTab] = useState<"COFFEE" | "FOOD">("COFFEE");
@@ -192,12 +193,45 @@ export default function CustomerHome() {
     }
   };
 
-  const showSuccess = (msg: string) => {
+  const showSuccess = (msg: string, userIsNew?: boolean) => {
     setSuccessMessage(msg);
-    setModalType("SUCCESS");
-    setTimeout(() => {
-      closeModal();
-    }, 2500);
+    if (userIsNew !== undefined) setIsNewUser(userIsNew);
+    
+    let lastSurveyDate = "";
+    const today = new Date().toISOString().split('T')[0];
+    const storageKey = `lastSurveyDate_${session?.user?.id || 'guest'}`;
+    
+    if (typeof window !== "undefined") {
+      lastSurveyDate = localStorage.getItem(storageKey) || "";
+    }
+
+    if (userIsNew !== undefined && lastSurveyDate !== today) {
+      if (typeof window !== "undefined") localStorage.setItem(storageKey, today);
+      setModalType("SUCCESS_WITH_SURVEY");
+    } else {
+      setModalType("SUCCESS");
+      setTimeout(() => {
+        closeModal();
+      }, 2500);
+    }
+  };
+
+  const closeSurvey = async () => {
+    fetch("/api/customer/survey", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ skipped: true, isNewUser })
+    }).catch(() => {});
+    closeModal();
+  };
+
+  const submitSurvey = async (answer: string) => {
+    fetch("/api/customer/survey", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ answer, skipped: false, isNewUser })
+    }).catch(() => {});
+    closeModal();
   };
 
   const openNotifications = () => {
@@ -234,7 +268,7 @@ export default function CustomerHome() {
           foodPoints: data.newFoodPoints,
           foodRewards: data.newFoodRewards
         });
-        showSuccess(data.message || "Puan Başarıyla Eklendi!");
+        showSuccess(data.message || "Puan Başarıyla Eklendi!", data.isNewUser);
       } else {
         alert(data.error || "Hata oluştu.");
       }
@@ -664,22 +698,10 @@ export default function CustomerHome() {
             textAlign: "center"
           }}>
             
-            {modalType !== "SUCCESS" && (
+            {modalType !== "SUCCESS" && modalType !== "SUCCESS_WITH_SURVEY" && (
               <button onClick={closeModal} style={{ position: "absolute", top: "0.75rem", right: "0.75rem", background: "none", border: "none", cursor: "pointer" }}>
                 <X size={24} color="#000" />
               </button>
-            )}
-
-            {modalType === "SCAN" && (
-              <>
-                <h2 className="font-caveat" style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>Barkod Okut</h2>
-                <div style={{ width: "100%", borderRadius: "1rem", overflow: "hidden", border: "2px solid var(--primary)" }}>
-                  <Scanner onScan={(result) => handleScan(result[0].rawValue)} />
-                </div>
-                <p style={{ marginTop: "1rem", color: "var(--text-secondary)", fontSize: "0.8rem" }}>
-                  Kasiyerin gösterdiği kodu taratın.
-                </p>
-              </>
             )}
 
             {modalType === "REDEEM" && (
@@ -770,6 +792,46 @@ export default function CustomerHome() {
                 ) : (
                   <p style={{ color: "var(--text-secondary)", fontSize: "0.875rem", padding: "1rem" }}>Şu an yeni bildiriminiz bulunmuyor.</p>
                 )}
+              </>
+            )}
+
+            {modalType === "SUCCESS_WITH_SURVEY" && (
+              <>
+                <button onClick={closeSurvey} style={{ position: "absolute", top: "0.75rem", right: "0.75rem", background: "none", border: "none", cursor: "pointer", zIndex: 10 }}>
+                  <X size={24} color="#000" />
+                </button>
+                <div style={{
+                  width: "60px", height: "60px", borderRadius: "50%",
+                  backgroundColor: "var(--success)", display: "flex",
+                  alignItems: "center", justifyContent: "center",
+                  marginBottom: "1rem", animation: "fadeIn 0.5s ease-out"
+                }}>
+                  <Check size={32} color="white" strokeWidth={4} />
+                </div>
+                <h2 className="font-caveat" style={{ fontSize: "1.8rem", color: "var(--success)", lineHeight: 1.2, marginBottom: "0.5rem" }}>
+                  {successMessage}
+                </h2>
+                
+                <div style={{ marginTop: "1rem", width: "100%", padding: "1rem", backgroundColor: "var(--bg-primary)", borderRadius: "1rem", border: "1px solid var(--border-color)" }}>
+                  <h3 style={{ fontSize: "1rem", marginBottom: "1rem", color: "var(--text-primary)" }}>
+                    {isNewUser ? "Bizi yeni mi keşfettiniz?" : "Bugünkü deneyiminizi nasıl puanlarsınız?"}
+                  </h3>
+                  
+                  {isNewUser ? (
+                    <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+                      <button onClick={() => submitSurvey("İlk kez geliyorum")} className="btn-primary" style={{ padding: "0.75rem", fontSize: "0.9rem" }}>İlk kez geliyorum</button>
+                      <button onClick={() => submitSurvey("Daha önce gelmiştim")} className="btn-secondary" style={{ padding: "0.75rem", fontSize: "0.9rem" }}>Daha önce gelmiştim</button>
+                    </div>
+                  ) : (
+                    <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem" }}>
+                      {[1,2,3,4,5].map((star) => (
+                        <button key={star} onClick={() => submitSurvey(star.toString())} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "2rem", transition: "transform 0.2s" }}>
+                          ⭐
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </>
             )}
 

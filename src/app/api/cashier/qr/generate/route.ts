@@ -12,13 +12,13 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { beans, productType } = body;
+    const { beans, foodPoints, productType } = body;
 
-    if (!beans || beans < 1) {
-      return NextResponse.json({ error: "Geçersiz adet" }, { status: 400 });
-    }
+    const type = productType === "FOOD" ? "FOOD" : productType === "BOTH" ? "BOTH" : "COFFEE";
 
-    const type = productType === "FOOD" ? "FOOD" : "COFFEE";
+    if (type === "COFFEE" && (!beans || beans < 1)) return NextResponse.json({ error: "Geçersiz adet" }, { status: 400 });
+    if (type === "FOOD" && (!foodPoints || foodPoints < 1)) return NextResponse.json({ error: "Geçersiz adet" }, { status: 400 });
+    if (type === "BOTH" && ((!beans || beans < 1) || (!foodPoints || foodPoints < 1))) return NextResponse.json({ error: "Geçersiz adet" }, { status: 400 });
 
     // Rastgele benzersiz bir token string oluştur
     const tokenString = crypto.randomUUID();
@@ -30,7 +30,8 @@ export async function POST(req: Request) {
         token: tokenString,
         type: "EARN",
         productType: type,
-        beans: parseInt(beans),
+        beans: type === "COFFEE" || type === "BOTH" ? parseInt(beans) : null,
+        foodPoints: type === "FOOD" || type === "BOTH" ? parseInt(foodPoints) : null,
         expiresAt
       }
     });

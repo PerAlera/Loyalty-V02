@@ -32,23 +32,47 @@ export async function POST(req: Request) {
       wallet = await prisma.wallet.create({ data: { userId: session.user.id, beans: 0, rewards: 0, foodPoints: 0, foodRewards: 0 } });
     }
 
-    const beansEarned = qrToken.beans || 1;
+    const beansEarned = qrToken.beans || 0;
+    const foodPointsEarned = qrToken.foodPoints || 0;
+    
     let newBeans = wallet.beans;
     let newRewards = wallet.rewards;
     let newFoodPoints = wallet.foodPoints;
     let newFoodRewards = wallet.foodRewards;
 
-    if (qrToken.productType === "FOOD") {
-      newFoodPoints += beansEarned;
-      while (newFoodPoints >= requiredFoods) {
-        newFoodPoints -= requiredFoods;
-        newFoodRewards += 1;
+    const transactions = [];
+
+    if (qrToken.productType === "FOOD" || qrToken.productType === "BOTH") {
+      if (foodPointsEarned > 0) {
+        newFoodPoints += foodPointsEarned;
+        while (newFoodPoints >= requiredFoods) {
+          newFoodPoints -= requiredFoods;
+          newFoodRewards += 1;
+        }
+        transactions.push(prisma.transaction.create({
+          data: {
+            userId: session.user.id,
+            type: "EARN_FOOD",
+            amount: foodPointsEarned
+          }
+        }));
       }
-    } else {
-      newBeans += beansEarned;
-      while (newBeans >= requiredCoffees) {
-        newBeans -= requiredCoffees;
-        newRewards += 1;
+    }
+    
+    if (qrToken.productType === "COFFEE" || qrToken.productType === "BOTH") {
+      if (beansEarned > 0) {
+        newBeans += beansEarned;
+        while (newBeans >= requiredCoffees) {
+          newBeans -= requiredCoffees;
+          newRewards += 1;
+        }
+        transactions.push(prisma.transaction.create({
+          data: {
+            userId: session.user.id,
+            type: "EARN_BEAN",
+            amount: beansEarned
+          }
+        }));
       }
     }
 
@@ -66,20 +90,30 @@ export async function POST(req: Request) {
           foodRewards: newFoodRewards
         }
       }),
-      prisma.transaction.create({
-        data: {
-          userId: session.user.id,
-          type: qrToken.productType === "FOOD" ? "EARN_FOOD" : "EARN_BEAN",
-          amount: beansEarned
-        }
-      })
+      ...transactions
     ]);
 
-    const pointName = qrToken.productType === "FOOD" ? "yemek puanı" : "kahve çekirdeği";
+    const txCount = await prisma.transaction.count({
+      where: { userId: session.user.id, type: { in: ["EARN_BEAN", "EARN_FOOD"] } }
+    });
+    
+    // Determine if new user (if they just made their first earn transaction(s))
+    // If BOTH was used, txCount might be 2. So if txCount <= 2 and they only had this one session, they are new.
+    const isNewUser = txCount <= transactions.length;
+
+    let message = "";
+    if (qrToken.productType === "BOTH") {
+      message = `${beansEarned} kahve ve ${foodPointsEarned} yemek puanı başarıyla eklendi!`;
+    } else if (qrToken.productType === "FOOD") {
+      message = `${foodPointsEarned} yemek puanı başarıyla eklendi!`;
+    } else {
+      message = `${beansEarned} kahve çekirdeği başarıyla eklendi!`;
+    }
 
     return NextResponse.json({ 
       success: true, 
-      message: `${beansEarned} ${pointName} başarıyla eklendi!`,
+      message,
+      isNewUser,
       newBeans,
       newRewards,
       newFoodPoints,

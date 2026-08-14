@@ -8,10 +8,28 @@ export default function CashierDashboard() {
   const { data: session } = useSession();
   
   const [token, setToken] = useState<string | null>(null);
-  const [beans, setBeans] = useState<number>(1);
-  const [productType, setProductType] = useState<"COFFEE" | "FOOD">("COFFEE");
+  
+  // State for Combined QR
+  const [coffeeEnabled, setCoffeeEnabled] = useState(true);
+  const [foodEnabled, setFoodEnabled] = useState(false);
+  const [coffeeBeans, setCoffeeBeans] = useState<number>(1);
+  const [foodPoints, setFoodPoints] = useState<number>(1);
+  
+  const [isStoreFoodEnabled, setIsStoreFoodEnabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ text: string, type: "success" | "error" } | null>(null);
+
+  useEffect(() => {
+    // Fetch store settings to see if food is enabled
+    fetch("/api/cashier/settings")
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.isFoodEnabled === "boolean") {
+          setIsStoreFoodEnabled(data.isFoodEnabled);
+        }
+      })
+      .catch(err => console.error("Settings fetch error:", err));
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -40,13 +58,23 @@ export default function CashierDashboard() {
 
   const generateToken = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!coffeeEnabled && !foodEnabled) {
+      setMessage({ text: "Lütfen en az bir puan türü seçin.", type: "error" });
+      return;
+    }
+    
     setLoading(true);
     setMessage(null);
     try {
+      const productType = coffeeEnabled && foodEnabled ? "BOTH" : foodEnabled ? "FOOD" : "COFFEE";
+      const payload: any = { productType };
+      if (coffeeEnabled) payload.beans = coffeeBeans;
+      if (foodEnabled) payload.foodPoints = foodPoints;
+      
       const res = await fetch("/api/cashier/qr/generate", { 
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ beans, productType })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       
@@ -81,54 +109,62 @@ export default function CashierDashboard() {
 
       <div className="surface-card" style={{ textAlign: "center", maxWidth: "500px", margin: "0 auto" }}>
         <h2 style={{ marginBottom: "1rem" }}>Müşteriye Puan Ver</h2>
-        <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>Müşteriye vermek istediğiniz puan türünü ve adedini seçin.</p>
+        <p style={{ color: "var(--text-secondary)", marginBottom: "2rem" }}>Müşteriye vermek istediğiniz puan türlerini seçin ve adetlerini belirleyin.</p>
 
         {token ? (
           <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "1.5rem" }}>
             <div style={{ padding: "1rem", background: "white", borderRadius: "1rem", border: "1px solid var(--border-color)", position: "relative" }}>
               <QRCodeSVG value={token} size={250} />
-              <div style={{ position: "absolute", top: -15, right: -15, background: productType === "COFFEE" ? "var(--primary)" : "#F59E0B", color: "white", padding: "0.5rem", borderRadius: "50%", fontWeight: "bold", fontSize: "1.2rem", width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                {beans}
-              </div>
             </div>
-            <p style={{ color: "var(--text-secondary)", fontWeight: "bold", fontSize: "1.1rem" }}>
-              {productType === "COFFEE" ? "Kahve Puanı" : "Yemek Puanı"}
-            </p>
+            <div style={{ display: "flex", gap: "1rem", justifyContent: "center" }}>
+              {coffeeEnabled && (
+                <div style={{ background: "var(--primary)", color: "white", padding: "0.5rem 1rem", borderRadius: "2rem", fontWeight: "bold", fontSize: "1rem" }}>
+                  ☕ {coffeeBeans} Kahve
+                </div>
+              )}
+              {foodEnabled && (
+                <div style={{ background: "#F59E0B", color: "white", padding: "0.5rem 1rem", borderRadius: "2rem", fontWeight: "bold", fontSize: "1rem" }}>
+                  🍔 {foodPoints} Yemek
+                </div>
+              )}
+            </div>
             <p style={{ color: "var(--text-secondary)" }}>Lütfen müşterinin bu kodu okutmasını bekleyin.</p>
             <button className="btn-secondary" onClick={() => setToken(null)} style={{ width: "100%" }}>Yeni Kod Oluştur</button>
           </div>
         ) : (
           <form onSubmit={generateToken} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             
-            <div style={{ display: "flex", background: "var(--bg-primary)", borderRadius: "0.5rem", overflow: "hidden", border: "1px solid var(--border-color)" }}>
-              <button
-                type="button"
-                onClick={() => setProductType("COFFEE")}
-                style={{ flex: 1, padding: "0.75rem", border: "none", cursor: "pointer", fontWeight: "bold", background: productType === "COFFEE" ? "var(--primary)" : "transparent", color: productType === "COFFEE" ? "white" : "var(--text-secondary)", transition: "all 0.2s" }}
-              >
-                ☕ Kahve
-              </button>
-              <button
-                type="button"
-                onClick={() => setProductType("FOOD")}
-                style={{ flex: 1, padding: "0.75rem", border: "none", cursor: "pointer", fontWeight: "bold", background: productType === "FOOD" ? "#F59E0B" : "transparent", color: productType === "FOOD" ? "white" : "var(--text-secondary)", transition: "all 0.2s" }}
-              >
-                🍔 Yemek
-              </button>
+            {/* Coffee Checkbox & Input */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem", border: coffeeEnabled ? "2px solid var(--primary)" : "1px solid var(--border-color)", borderRadius: "0.75rem", background: coffeeEnabled ? "rgba(101, 67, 33, 0.05)" : "transparent", transition: "all 0.2s" }}>
+              <label style={{ display: "flex", alignItems: "center", gap: "0.75rem", cursor: "pointer" }}>
+                <input type="checkbox" checked={coffeeEnabled} onChange={(e) => setCoffeeEnabled(e.target.checked)} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
+                <span style={{ fontWeight: "bold", fontSize: "1.1rem", color: coffeeEnabled ? "var(--primary)" : "var(--text-secondary)" }}>☕ Kahve Puanı</span>
+              </label>
+              {coffeeEnabled && (
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                  <label style={{ flex: 1, textAlign: "left", color: "var(--text-secondary)", fontSize: "0.875rem" }}>Adet:</label>
+                  <input type="number" min="1" className="form-input" style={{ width: "80px", textAlign: "center" }} value={coffeeBeans} onChange={e => setCoffeeBeans(parseInt(e.target.value))} required />
+                </div>
+              )}
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", textAlign: "left" }}>
-              <label style={{ fontWeight: "bold", color: "var(--text-secondary)", fontSize: "0.875rem" }}>Puan Adedi</label>
-              <input 
-                type="number" 
-                min="1" 
-                className="form-input" 
-                value={beans} 
-                onChange={e => setBeans(parseInt(e.target.value))} 
-                required 
-              />
-            </div>
-            <button type="submit" className="btn-primary" disabled={loading} style={{ padding: "1rem", fontSize: "1.125rem", background: productType === "COFFEE" ? "var(--primary)" : "#F59E0B" }}>
+            {/* Food Checkbox & Input */}
+            {isStoreFoodEnabled && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1rem", border: foodEnabled ? "2px solid #F59E0B" : "1px solid var(--border-color)", borderRadius: "0.75rem", background: foodEnabled ? "rgba(245, 158, 11, 0.05)" : "transparent", transition: "all 0.2s" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.75rem", cursor: "pointer" }}>
+                  <input type="checkbox" checked={foodEnabled} onChange={(e) => setFoodEnabled(e.target.checked)} style={{ width: "20px", height: "20px", cursor: "pointer" }} />
+                  <span style={{ fontWeight: "bold", fontSize: "1.1rem", color: foodEnabled ? "#F59E0B" : "var(--text-secondary)" }}>🍔 Yemek Puanı</span>
+                </label>
+                {foodEnabled && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+                    <label style={{ flex: 1, textAlign: "left", color: "var(--text-secondary)", fontSize: "0.875rem" }}>Adet:</label>
+                    <input type="number" min="1" className="form-input" style={{ width: "80px", textAlign: "center" }} value={foodPoints} onChange={e => setFoodPoints(parseInt(e.target.value))} required />
+                  </div>
+                )}
+              </div>
+            )}
+
+            <button type="submit" className="btn-primary" disabled={loading} style={{ padding: "1rem", fontSize: "1.125rem", background: coffeeEnabled && !foodEnabled ? "var(--primary)" : foodEnabled && !coffeeEnabled ? "#F59E0B" : "#111827" }}>
               {loading ? "Oluşturuluyor..." : "QR Kod Oluştur"}
             </button>
           </form>
