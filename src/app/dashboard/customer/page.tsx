@@ -704,6 +704,18 @@ export default function CustomerHome() {
               </button>
             )}
 
+            {modalType === "SCAN" && (
+              <>
+                <h2 className="font-caveat" style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>Barkod Okut</h2>
+                <div style={{ width: "100%", borderRadius: "1rem", overflow: "hidden", border: "2px solid var(--primary)" }}>
+                  <Scanner onScan={(result) => handleScan(result[0].rawValue)} />
+                </div>
+                <p style={{ marginTop: "1rem", color: "var(--text-secondary)", fontSize: "0.8rem" }}>
+                  Kasiyerin gösterdiği kodu taratın.
+                </p>
+              </>
+            )}
+
             {modalType === "REDEEM" && (
               <>
                 <h2 className="font-caveat" style={{ fontSize: "1.8rem", marginBottom: "1rem" }}>Ödül Kodunuz</h2>
