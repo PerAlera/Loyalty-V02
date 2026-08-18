@@ -14,19 +14,31 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { answer, skipped, isNewUser } = body;
 
+    // Müşterinin storeId'si yoksa sistemdeki ilk mağazayı bul
+    let storeId = null;
+    
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
       select: { storeId: true }
     });
 
-    if (!user || !user.storeId) {
-      return NextResponse.json({ error: "Kullanıcı veya işletme bulunamadı" }, { status: 404 });
+    if (user && user.storeId) {
+      storeId = user.storeId;
+    } else {
+      const firstStore = await prisma.store.findFirst();
+      if (firstStore) {
+        storeId = firstStore.id;
+      }
+    }
+
+    if (!storeId) {
+      return NextResponse.json({ error: "Sistemde kayıtlı mağaza bulunamadı" }, { status: 404 });
     }
 
     const surveyResponse = await prisma.surveyResponse.create({
       data: {
         userId: session.user.id,
-        storeId: user.storeId,
+        storeId: storeId,
         isNewUser: Boolean(isNewUser),
         answer: skipped ? null : String(answer),
         skipped: Boolean(skipped)
