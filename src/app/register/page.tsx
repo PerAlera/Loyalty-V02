@@ -50,8 +50,7 @@ export default function RegisterPage() {
       if (signInRes?.error) {
         throw new Error(signInRes.error);
       } else {
-        router.push("/");
-        router.refresh();
+        window.location.href = "/";
       }
     } catch (err: any) {
       setError(err.message);
