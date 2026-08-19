@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { signIn, useSession } from "next-auth/react";
+import { signIn, useSession, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
@@ -46,7 +46,14 @@ export default function LoginPage() {
       setError(res.error);
       setLoading(false);
     } else {
-      window.location.href = "/";
+      const currentSession = await getSession();
+      if (currentSession?.user?.role === "OWNER") {
+        window.location.href = "/dashboard/owner";
+      } else if (currentSession?.user?.role === "CASHIER") {
+        window.location.href = "/dashboard/cashier";
+      } else {
+        window.location.href = "/dashboard/customer";
+      }
     }
   };
 

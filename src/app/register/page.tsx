@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
+import { signIn, getSession } from "next-auth/react";
 import Image from "next/image";
 import styles from "../login/login.module.css";
 
@@ -50,7 +50,14 @@ export default function RegisterPage() {
       if (signInRes?.error) {
         throw new Error(signInRes.error);
       } else {
-        window.location.href = "/";
+        const currentSession = await getSession();
+        if (currentSession?.user?.role === "OWNER") {
+          window.location.href = "/dashboard/owner";
+        } else if (currentSession?.user?.role === "CASHIER") {
+          window.location.href = "/dashboard/cashier";
+        } else {
+          window.location.href = "/dashboard/customer";
+        }
       }
     } catch (err: any) {
       setError(err.message);
