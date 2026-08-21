@@ -465,6 +465,34 @@ export default function CustomerHome() {
         </div>
       </div>
 
+      {/* Profil Tamamlama Afişi */}
+      {profileReward?.enabled && !profileReward?.claimed && (
+        <Link href="/dashboard/customer/profile" style={{ textDecoration: "none" }}>
+          <div style={{
+            margin: "0.5rem 0 1.5rem 0",
+            padding: "0.75rem 1rem",
+            backgroundColor: "#FFF3CD",
+            border: "1px solid #FFEEBA",
+            borderRadius: "0.75rem",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            boxShadow: "0 2px 4px rgba(0,0,0,0.05)",
+            animation: "pulse 2s infinite"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span style={{ fontSize: "1.25rem" }}>🎁</span>
+              <span style={{ fontSize: "0.875rem", fontWeight: "600", color: "#856404" }}>
+                Profilini tamamla, anında {profileReward.amount} Kahve kazan!
+              </span>
+            </div>
+            <span style={{ fontSize: "0.75rem", fontWeight: "bold", color: "#856404", backgroundColor: "#FFE8A1", padding: "0.25rem 0.5rem", borderRadius: "1rem" }}>
+              Hemen Tamamla
+            </span>
+          </div>
+        </Link>
+      )}
+
       {/* İllüstrasyon ve Butonlar */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
 
@@ -825,8 +853,8 @@ export default function CustomerHome() {
                 </h2>
                 
                 <div style={{ marginTop: "1rem", width: "100%", padding: "1rem", backgroundColor: "var(--bg-primary)", borderRadius: "1rem", border: "1px solid var(--border-color)" }}>
-                  <h3 style={{ fontSize: "1rem", marginBottom: "1rem", color: "var(--text-primary)" }}>
-                    {isNewUser ? "Bizi yeni mi keşfettiniz?" : "Bugünkü deneyiminizi nasıl puanlarsınız?"}
+                  <h3 style={{ fontSize: "1rem", marginBottom: "0.5rem", color: "var(--text-primary)" }}>
+                    {isNewUser ? "Bizi yeni mi keşfettiniz?" : "Aramızda kalsın, bugünkü deneyiminiz nasıldı?"}
                   </h3>
                   
                   {isNewUser ? (
@@ -835,14 +863,16 @@ export default function CustomerHome() {
                       <button onClick={() => submitSurvey("Daha önce gelmiştim")} className="btn-secondary" style={{ padding: "0.75rem", fontSize: "0.9rem" }}>Daha önce gelmiştim</button>
                     </div>
                   ) : (
-                    <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem" }}>
-                      {[1,2,3,4,5].map((star) => (
-                        <button key={star} onClick={() => submitSurvey(star.toString())} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "2rem", transition: "transform 0.2s" }}>
-                          ⭐
-                        </button>
-                      ))}
+                    <div style={{ display: "flex", justifyContent: "center", gap: "1rem", marginBottom: "0.5rem" }}>
+                      <button onClick={() => submitSurvey("Kötü")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "2.5rem", transition: "transform 0.2s" }} title="Kötü">😞</button>
+                      <button onClick={() => submitSurvey("İdare Eder")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "2.5rem", transition: "transform 0.2s" }} title="İdare Eder">😐</button>
+                      <button onClick={() => submitSurvey("Harika")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: "2.5rem", transition: "transform 0.2s" }} title="Harika">🤩</button>
                     </div>
                   )}
+                  
+                  <p style={{ fontSize: "0.75rem", color: "var(--text-secondary)", textAlign: "center", margin: "0.5rem 0 0 0" }}>
+                    Sadece dokunun. (Başka sayfaya yönlendirilmezsiniz ⚡)
+                  </p>
                 </div>
               </>
             )}

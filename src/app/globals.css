@@ -8,7 +8,7 @@
   --primary: #654321; /* Koyu Kahve (Ana buton) */
   --primary-hover: #4A3015;
   
-  --secondary: #C29B73; /* Karamel/Sütlü Kahve (Alt butonlar) */
+  --secondary: #C29B73; /* Karamel/SÃ¼tlÃ¼ Kahve (Alt butonlar) */
   --secondary-hover: #A8815A;
   
   --success: #22C55E;
@@ -17,13 +17,13 @@
   
   --border-color: #E2E8F0;
   
-  /* Glassmorphism Ayarları (İptal - Düz Modern UI) */
+  /* Glassmorphism AyarlarÄ± (Ä°ptal - DÃ¼z Modern UI) */
   --surface-shadow: 0 4px 24px -4px rgba(15, 23, 42, 0.05);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    /* Karanlık mod istenmedi, ancak her ihtimale karşı temiz tutuyoruz */
+    /* KaranlÄ±k mod istenmedi, ancak her ihtimale karÅŸÄ± temiz tutuyoruz */
     --bg-primary: #FFFFFF;
     --bg-secondary: #F8FAFC;
     --text-primary: #000000;
@@ -41,7 +41,7 @@
   font-family: var(--font-inter), sans-serif;
 }
 
-/* Özel Font Sınıfları */
+/* Ã–zel Font SÄ±nÄ±flarÄ± */
 .font-caveat {
   font-family: var(--font-caveat), cursive;
 }
@@ -72,7 +72,7 @@ a:hover {
   color: var(--primary-hover);
 }
 
-/* Genel Sınıflar */
+/* Genel SÄ±nÄ±flar */
 .container {
   width: 100%;
   max-width: 1200px;
@@ -80,7 +80,7 @@ a:hover {
   padding: 0 1.5rem;
 }
 
-/* Yüzey Kartları (Surface) */
+/* YÃ¼zey KartlarÄ± (Surface) */
 .surface-card {
   background: var(--bg-secondary);
   border: 1px solid var(--border-color);
@@ -150,7 +150,7 @@ a:hover {
   color: white;
 }
 
-/* Form Elemanları */
+/* Form ElemanlarÄ± */
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -233,4 +233,10 @@ a:hover {
     justify-content: space-between;
     align-items: center;
   }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
 }
